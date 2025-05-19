@@ -2,7 +2,7 @@
 set -e  # Exit immediately if any command exits with a non-zero status
 function show_help() {
     echo "Usage:"
-    echo "-outputfolder The name of the folder inside /output/ where user generated files will be saved."
+    echo "-book          Name of the book in /data/, the same name will be used for the output/ folder where user generated files will reside."
     echo "-actions       List of actions to perform (dash-separated, no spaces). Defaults to 'all'."
     echo "-install       Installs dependencies."
     echo "-format        Format the code with black."
@@ -14,9 +14,9 @@ function show_help() {
     echo "-precommit     Run format, lint, security, audit and test"
     echo "-help          Show this help message."
     echo ""
-    echo "Availabe actions: action1, action2",
+    echo "Availabe actions: generatedb, ask. ask can only be called if generatedb has been completed.",
     echo ""
-    echo "Example: ./run.sh -outputfolder test_folder -actions action1-action2"
+    echo "Example: ./run.sh -book my_book.pdf -actions generatedb-ask"
     exit 0
 }
 
@@ -44,15 +44,15 @@ execute_action() {
     esac
 }
 
-if [ "$1" = "-outputfolder" ]; then
+if [ "$1" = "-book" ]; then
     if [ -z "$2" ]; then
-	   echo "-outputfolder parameter provided but no outputfolder value found."
+	   echo "-book parameter provided but no book value found."
     	exit 1
     elif [ -z "$3" -o "$3" != "-actions" ]; then
-    	python -m src.app.cli --outputfolder "$2" --actions all
+    	python -m src.app.cli --book "$2" --actions all
     	exit 0
     elif [ -n "$3" -a "$3" = "-actions" -a -n "$4" ]; then
-    	python -m src.app.cli --outputfolder "$2" --actions "$4"
+    	python -m src.app.cli --book "$2" --actions "$4"
     	exit 0
     fi
 fi

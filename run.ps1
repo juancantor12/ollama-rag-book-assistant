@@ -1,6 +1,6 @@
 param (
-    [string]$outputfolder,  # folder inside /output/ where user generated files will be saved
-    [string]$actions,       # Which actions to perform, if empty, all are executed
+    [string]$book,       # Name of the book in /data/, the same name will be used for the output/ folder where user generated files will reside
+    [string]$actions,    # Which actions to perform, if empty, all are executed
     [switch]$install,
     [switch]$format,
     [switch]$lint,
@@ -32,7 +32,7 @@ if ($help){
     Write-Host (
         @(
             "Usage:",
-            "-outputfolder  Name of the folder inside /output/ where user generated files will be saved.",
+            "-book          Name of the book in /data/, the same name will be used for the output/ folder where user generated files will reside",
             "-actions       List of actions to perform (dash-separated, no spaces). Defaults to 'all'.",
             "-install       Installs dependencies",
             "-format        Format the code with black.",
@@ -44,10 +44,10 @@ if ($help){
             "-setup         Run install, format, lint, security, audit and test.",
             "-help          Show this help message."
             "",
-            "Availabe actions: action1, action2",
+            "Availabe actions: generatedb, ask. ask can only be called if generatedb has been completed.",
             "If no actions are provided, all will run",
             "",
-            "Example: .\\run.ps1 -outputfolder test_folder -actions action1-action2"
+            "Example: .\\run.ps1 -book my_book.pdf -actions generatedb-ask"
         ) -join [Environment]::NewLine
     )
     exit 0
@@ -68,12 +68,12 @@ if ($setup) {
     exit
 }
 
-if ($outputfolder) {
+if ($book) {
     Write-Host "Running the app"
     $script_action = "all"
     if($actions){
         $script_action = $actions
     }
-    python -m src.app.cli --outputfolder $outputfolder --actions $script_action
+    python -m src.app.cli --book $book --actions $script_action
     exit 0
 }

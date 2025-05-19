@@ -5,3 +5,5 @@ black
 pytest
 python-dotenv
 ollama
+chromadb
+PyMuPDF

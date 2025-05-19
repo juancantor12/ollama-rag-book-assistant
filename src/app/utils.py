@@ -65,3 +65,19 @@ class Utils:
             print(f"Saving to output/{file_name}")
 
         return True
+
+    @staticmethod
+    def strip_extension(file_name: str) -> str:
+        """
+        Strips the extension of the name of a file and returns the filename without the extension
+
+        Args:
+        file_name (str): the name of the file with extension, may have several dots
+
+        Returns:
+        str: the file name stripped of the extension
+        """
+        if "." in file_name:
+            segments = file_name.split(".")
+            return ".".join(segments[:-1])
+        return file_name
