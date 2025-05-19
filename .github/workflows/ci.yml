@@ -1,0 +1,37 @@
+name: CI Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        make install-dependencies
+
+    - name: Format code (black)
+      run: |
+        make format-code
+
+    - name: Lint code (ruff)
+      run: |
+        make lint-code
+
+    - name: Security linter (bandit)
+      run: |
+        make check-code-security
+
+    # - name: Dependencies vulnerabilities (pip-audit)
+    #   run: |
+    #     make check-dependencies-vulnerabilities
+
+    - name: Unit testing
+      run: |
+        make unit-testing

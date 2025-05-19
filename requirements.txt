@@ -1,0 +1,7 @@
+bandit
+pip-audit
+ruff
+black
+pytest
+python-dotenv
+ollama
