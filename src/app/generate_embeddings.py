@@ -17,14 +17,24 @@ class EmbeddingsGenerator:
             path=str(Utils.get_output_path(self.outputfolder))
         )
 
-    def parse_pdf(  # pylint: disable=too-many-locals
-        self, char_limit: int = 2000, overlap: int = 200
+
+    def get_toc(self, book: any) -> list:
+        """Retrieves the current book table of contens ignoring cover pages and retunrs it as a tuple."""
+        toc = []
+        for level, title, page in book.get_toc():
+            if page >= 0:
+                toc.append((level, title, page))
+        return toc
+
+    def parse_pdf(
+        self, char_limit: int = 1024, overlap: int = 200
     ) -> None:
         """
-        Retrieve an parses the PDF document by page, yielding text, level, title and page for each
+        Retrieve an parses the PDF document by page, yielding text, level, title and page for each.
         The text of each page will be divided into segments, segments are blocks of text that ends with a dot
         and a line break, if a segment is too big (cahr_limit), for example bigger than 2k chars (rouglhy 500 tokens)
-        it will be further divided in chunks no longer than char_limit with certain overlap
+        it will be further divided in chunks no longer than char_limit with certain overlap.
+        The function will try to clump small segments in a segment_chunk no longer than char_limit
 
         Args:
         char_limit (int): limit of character per chunk of text sent to the embedding model.
@@ -33,18 +43,15 @@ class EmbeddingsGenerator:
 
         """
         Utils.logger.info("Retrieving /data/%s", self.book_filename)
-        data_path = Utils.get_data_path()
-        with pymupdf.open(f"{data_path}/{self.book_filename}") as book:
-            toc = []  # Table of contents
-            for level, title, page in book.get_toc():
-                if page >= 0:
-                    toc.append((level, title, page))
+        with pymupdf.open(f"{Utils.get_data_path()}/{self.book_filename}") as book:
+            toc = self.get_toc(book)
             page, toc_index = 0, 0
             while page < book.page_count and (toc_index + 1) < len(toc):
                 text = book.load_page(page).get_text()
                 segments = re.split(
                     r"\.\s*\n", text
                 )  # Split texts by dot following by line break.
+                segment_chunk = ""
                 for segment in segments:
                     if len(segment) > 0:  # Only work with valid segments
                         if (
@@ -64,8 +71,16 @@ class EmbeddingsGenerator:
                                     end - overlap
                                 )  # overlap to counterweight truncated sentences
                         else:
-                            data = (segment, toc[toc_index][0], toc[toc_index][1], page)
-                            yield data
+                            if len(segment_chunk) + len(segment) < char_limit:
+                                segment_chunk += ". \n"+segment
+                            else:
+                                data = (segment_chunk, toc[toc_index][0], toc[toc_index][1], page)
+                                segment_chunk = segment
+                                yield data
+
+                if len(segment_chunk) > 0:
+                    data = (segment_chunk, toc[toc_index][0], toc[toc_index][1], page)
+                    yield data
 
                 page += 1
                 if page >= toc[(toc_index + 1)][2]:
