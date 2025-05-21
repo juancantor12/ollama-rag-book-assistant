@@ -17,14 +17,19 @@ class EmbeddingsGenerator:
             path=str(Utils.get_output_path(self.outputfolder))
         )
 
-    def parse_pdf(
+    def parse_pdf(  # pylint: disable=too-many-locals
         self, char_limit: int = 2000, overlap: int = 200
-    ) -> None:  # pylint: disable=too-many-locals
+    ) -> None:
         """
         Retrieve an parses the PDF document by page, yielding text, level, title and page for each
         The text of each page will be divided into segments, segments are blocks of text that ends with a dot
         and a line break, if a segment is too big (cahr_limit), for example bigger than 2k chars (rouglhy 500 tokens)
         it will be further divided in chunks no longer than char_limit with certain overlap
+
+        Args:
+        char_limit (int): limit of character per chunk of text sent to the embedding model.
+            default 2k assumin 4 chars = 1 token for the model 512 token limit
+        overlap (int): how much character to overlap when splitting a text block into chunks, to retain consistence
 
         """
         Utils.logger.info("Retrieving /data/%s", self.book_filename)
