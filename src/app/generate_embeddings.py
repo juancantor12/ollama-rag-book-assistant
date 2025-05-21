@@ -121,7 +121,7 @@ class EmbeddingsGenerator:
             )
             batch["ids"].append(str(idx))
             batch["embeddings"].extend(response["embeddings"])
-            batch["metadatas"].append({"level": level, "title": title, "page": page})
+            batch["metadatas"].append({"level": level, "title": title, "page": page, "text": text})
             if len(batch["ids"]) == batch_size:
                 Utils.logger.info("Saving a batch to chromadb....")
                 collection.add(
