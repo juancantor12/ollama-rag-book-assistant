@@ -1,12 +1,19 @@
 """Shared utilities for the app."""
 
-import pathlib
-
+from pathlib import Path
+from typing import Union
+from chromadb import PersistentClient
+from chromadb.api.models.Collection import Collection
 
 class Utils:
     """Utilities for the CV builder."""
 
     logger = None
+    COLLECTION_NAME = "embeddings"
+    DEFAULT_DB_FILENAME = "chroma.sqlite3"
+    CHAT_MODEL = "phi4:latest"
+    EMBEDDINGS_MODEL = "mxbai-embed-large"
+    N_DOCUMENTS = 3
 
     def __init__(self, output_folder_name):
         self.output_folder_name = output_folder_name
@@ -24,10 +31,10 @@ class Utils:
         str: The absolute path to the required output folder.
         """
         path = f"output/{output_folder_name}"
-        root_path = pathlib.Path(__file__).resolve().parents[2]
+        root_path = Path(__file__).resolve().parents[2]
         output_path = root_path / path
         if create:
-            pathlib.Path(output_path).mkdir(exist_ok=True)
+            Path(output_path).mkdir(exist_ok=True)
         return output_path
 
     @staticmethod
@@ -39,7 +46,7 @@ class Utils:
         str: the absolute path to the /data/ folder of the app
         """
         path = "data"
-        root_path = pathlib.Path(__file__).resolve().parents[2]
+        root_path = Path(__file__).resolve().parents[2]
         data_path = root_path / path
         return data_path
 
@@ -81,3 +88,29 @@ class Utils:
             segments = file_name.split(".")
             return ".".join(segments[:-1])
         return file_name
+
+
+    @staticmethod
+    def get_embeddings_db(output_folder: str) -> Union[None, Collection]:
+        """
+        Checks if a chromadb embeddings vector database exists within the specifief output folder
+        If the database exists, the function checks from the embeddings collection and lastly, the
+        collection exists, the function checks for the amount of records, if there are no records or
+        either the collection or the database doesn't exist it returns None, otherwise returns the collection.
+
+        Args:
+        output_folder (str): The output folder where the database file should be
+
+        Returns:
+        Union[None, chromadb.api.models.Collection.Collection]: the collection
+        """
+        output_path = Utils.get_output_path(output_folder)
+        if (Path(output_path) / Utils.DEFAULT_DB_FILENAME).exists():
+            client = PersistentClient(path=str(output_path))
+            if Utils.COLLECTION_NAME in [ c.name for c in client.list_collections() ]:
+                collection = client.get_collection(name=Utils.COLLECTION_NAME)
+                if collection.count() > 0:
+                    return collection
+                return None
+            return None
+        return None

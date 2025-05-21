@@ -1,7 +1,8 @@
 """Module for the embeddings generation process."""
 
 import re
-import chromadb
+from chromadb import PersistentClient
+from chromadb.api.models.Collection import Collection
 import ollama
 import pymupdf
 from .utils import Utils
@@ -10,16 +11,23 @@ from .utils import Utils
 class EmbeddingsGenerator:
     """Module for the embeddings generation process."""
 
-    def __init__(self, book_filename: str = ""):
+    def __init__(self, book_filename: str):
         self.book_filename = book_filename
-        self.outputfolder = Utils.strip_extension(book_filename)
-        self.chromaclient = chromadb.PersistentClient(
-            path=str(Utils.get_output_path(self.outputfolder))
+        self.output_folder = Utils.strip_extension(book_filename)
+        self.chromaclient = PersistentClient(
+            path=str(Utils.get_output_path(self.output_folder))
         )
 
 
-    def get_toc(self, book: any) -> list:
-        """Retrieves the current book table of contens ignoring cover pages and retunrs it as a tuple."""
+    def get_toc(self, book: pymupdf.Document ) -> list:
+        """
+        Retrieves the current book table of contens ignoring cover pages and retunrs it as a list of tuples.
+
+        Args:
+        book (pymupdf.Document): the opened document.
+        Returns:
+        list: A lis ot tuples with the TOC entries ignoring cover pages (negative numbered pages)
+        """
         toc = []
         for level, title, page in book.get_toc():
             if page >= 0:
@@ -28,7 +36,7 @@ class EmbeddingsGenerator:
 
     def parse_pdf(
         self, char_limit: int = 1024, overlap: int = 200
-    ) -> None:
+    ) -> tuple[str, int, str, int]:
         """
         Retrieve an parses the PDF document by page, yielding text, level, title and page for each.
         The text of each page will be divided into segments, segments are blocks of text that ends with a dot
@@ -90,28 +98,27 @@ class EmbeddingsGenerator:
                 "The pdf parsing has finished, %s pages parsed.", book.page_count
             )
 
-    def generate_embeddings(self) -> bool:
+    def generate_embeddings(self) -> Collection:
         """
         Generates the embeedings using ollama, stores them in a collection.
         Returns:
-        bool: True if finished. Will throw exception otherwise.
+        chromadb.api.models.Collection.Collection: The generated collection.
         """
-        collection_name = "embeddings"
-        if collection_name in [
+        if Utils.COLLECTION_NAME in [
             collection.name for collection in self.chromaclient.list_collections()
         ]:
             Utils.logger.info(
                 "Collection '%s' already exists. Deleting it and creating a new one.",
-                collection_name,
+                Utils.COLLECTION_NAME,
             )
-            self.chromaclient.delete_collection(collection_name)
+            self.chromaclient.delete_collection(Utils.COLLECTION_NAME)
         collection = self.chromaclient.create_collection(name="embeddings")
         batch_size = 1024
         batch = {"ids": [], "embeddings": [], "metadatas": []}
         idx = 0
         for text, level, title, page in self.parse_pdf():
             idx += 1
-            response = ollama.embed(model="mxbai-embed-large", input=text)
+            response = ollama.embed(model=Utils.EMBEDDINGS_MODEL, input=text)
             Utils.logger.info(
                 "Adding embeddings for level:   %s, page:  %s, title:   %s, textln:   %s",
                 level,
@@ -120,7 +127,7 @@ class EmbeddingsGenerator:
                 len(text),
             )
             batch["ids"].append(str(idx))
-            batch["embeddings"].extend(response["embeddings"])
+            batch["embeddings"].extend(response.get("embeddings", ""))
             batch["metadatas"].append({"level": level, "title": title, "page": page, "text": text})
             if len(batch["ids"]) == batch_size:
                 Utils.logger.info("Saving a batch to chromadb....")
@@ -130,4 +137,4 @@ class EmbeddingsGenerator:
                     metadatas=batch["metadatas"],
                 )
                 batch = {"ids": [], "embeddings": [], "metadatas": []}
-        return True
+        return collection

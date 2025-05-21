@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+from .assistant import Assistant
 from .generate_embeddings import EmbeddingsGenerator
 from .utils import Utils
 from .logging import setup_logging
@@ -12,9 +13,9 @@ class AppCLI:
 
     def __init__(self, book_filename: str = ""):
         self.book_filename = book_filename
-        self.outputfolder = Utils.strip_extension(book_filename)
-        Utils.logger = setup_logging(self.outputfolder)
-        self.embeddings = False
+        self.output_folder = Utils.strip_extension(book_filename)
+        Utils.logger = setup_logging(self.output_folder)
+        self.embeddings_collection = Utils.get_embeddings_db(self.output_folder)
 
     def generatedb(self) -> None:
         """
@@ -22,12 +23,13 @@ class AppCLI:
         """
         Utils.logger.info("Generating embeddings database...")
         embeddings_generator = EmbeddingsGenerator(self.book_filename)
-        if embeddings_generator.generate_embeddings():
+        embeddings = embeddings_generator.generate_embeddings()
+        if embeddings:
             Utils.logger.info(
                 "Finished embeddings generation, vector database at /output/%s...",
-                self.outputfolder,
+                self.output_folder,
             )
-            self.embeddings = True
+            self.embeddings_collection = embeddings
         else:
             Utils.logger.critical("Embeddings generation failed, see logs for details.")
             sys.exit(1)
@@ -36,8 +38,16 @@ class AppCLI:
         """
         Wrapper for calling the chat module
         """
-        if self.embeddings:
-            Utils.logger.info("Asking about the book...")
+        if self.embeddings_collection:
+            assistant = Assistant(self.embeddings_collection)
+            while True:
+                user_input = input(
+                    f"Ask a question about {self.book_filename} or type 'exit' to finish the session: "
+                )
+                if user_input == "exit":
+                    Utils.logger.info("Finalizing session...")
+                    break
+                assistant.ask(user_input)
         else:
             Utils.logger.critical(
                 "Embeddings database has not been generated or cannot be found, run generatedb first"
