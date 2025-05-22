@@ -5,6 +5,7 @@ from typing import Union
 from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
 
+
 class Utils:
     """Utilities for the CV builder."""
 
@@ -89,7 +90,6 @@ class Utils:
             return ".".join(segments[:-1])
         return file_name
 
-
     @staticmethod
     def get_embeddings_db(output_folder: str) -> Union[None, Collection]:
         """
@@ -107,7 +107,7 @@ class Utils:
         output_path = Utils.get_output_path(output_folder)
         if (Path(output_path) / Utils.DEFAULT_DB_FILENAME).exists():
             client = PersistentClient(path=str(output_path))
-            if Utils.COLLECTION_NAME in [ c.name for c in client.list_collections() ]:
+            if Utils.COLLECTION_NAME in [c.name for c in client.list_collections()]:
                 collection = client.get_collection(name=Utils.COLLECTION_NAME)
                 if collection.count() > 0:
                     return collection

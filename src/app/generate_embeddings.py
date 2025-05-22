@@ -35,7 +35,7 @@ class EmbeddingsGenerator:
         return toc
 
     def parse_pdf(
-        self, char_limit: int = 1024, overlap: int = 200
+        self, char_limit: int = 2000, overlap: int = 200
     ) -> tuple[str, int, str, int]:
         """
         Retrieve an parses the PDF document by page, yielding text, level, title and page for each.
@@ -114,7 +114,7 @@ class EmbeddingsGenerator:
             self.chromaclient.delete_collection(Utils.COLLECTION_NAME)
         collection = self.chromaclient.create_collection(name="embeddings")
         batch_size = 1024
-        batch = {"ids": [], "embeddings": [], "metadatas": []}
+        batch = {"ids": [], "embeddings": [], "metadatas": [], "documents": []}
         idx = 0
         for text, level, title, page in self.parse_pdf():
             idx += 1
@@ -128,13 +128,15 @@ class EmbeddingsGenerator:
             )
             batch["ids"].append(str(idx))
             batch["embeddings"].extend(response.get("embeddings", ""))
-            batch["metadatas"].append({"level": level, "title": title, "page": page, "text": text})
+            batch["metadatas"].append({"level": level, "title": title, "page": page})
+            batch["documents"].append(text)
             if len(batch["ids"]) == batch_size:
                 Utils.logger.info("Saving a batch to chromadb....")
                 collection.add(
                     ids=batch["ids"],
                     embeddings=batch["embeddings"],
                     metadatas=batch["metadatas"],
+                    documents=batch["documents"]
                 )
-                batch = {"ids": [], "embeddings": [], "metadatas": []}
+                batch = {"ids": [], "embeddings": [], "metadatas": [], "documents": []}
         return collection
