@@ -39,7 +39,7 @@ class AppCLI:
         Wrapper for calling the chat module
         """
         if self.embeddings_collection:
-            assistant = Assistant(self.embeddings_collection)
+            assistant = Assistant(self.book_filename, self.embeddings_collection)
             while True:
                 user_input = input(
                     f"Ask a question about {self.book_filename} or type 'exit' to finish the session: "

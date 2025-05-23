@@ -18,8 +18,7 @@ class EmbeddingsGenerator:
             path=str(Utils.get_output_path(self.output_folder))
         )
 
-
-    def get_toc(self, book: pymupdf.Document ) -> list:
+    def get_toc(self, book: pymupdf.Document) -> list:
         """
         Retrieves the current book table of contens ignoring cover pages and retunrs it as a list of tuples.
 
@@ -80,9 +79,14 @@ class EmbeddingsGenerator:
                                 )  # overlap to counterweight truncated sentences
                         else:
                             if len(segment_chunk) + len(segment) < char_limit:
-                                segment_chunk += ". \n"+segment
+                                segment_chunk += ". \n" + segment
                             else:
-                                data = (segment_chunk, toc[toc_index][0], toc[toc_index][1], page)
+                                data = (
+                                    segment_chunk,
+                                    toc[toc_index][0],
+                                    toc[toc_index][1],
+                                    page,
+                                )
                                 segment_chunk = segment
                                 yield data
 
@@ -136,7 +140,7 @@ class EmbeddingsGenerator:
                     ids=batch["ids"],
                     embeddings=batch["embeddings"],
                     metadatas=batch["metadatas"],
-                    documents=batch["documents"]
+                    documents=batch["documents"],
                 )
                 batch = {"ids": [], "embeddings": [], "metadatas": [], "documents": []}
         return collection
