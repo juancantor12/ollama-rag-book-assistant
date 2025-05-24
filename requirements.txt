@@ -12,3 +12,4 @@ uvicorn
 pydantic
 pyjwt
 bcrypt
+SQLAlchemy

@@ -8,8 +8,9 @@ class UserCreate(BaseModel):
     password: str
     role: str
 
-class UserResponse(BaseModel):
+class UserGet(BaseModel):
     """User retrieval schema."""
     idx: int
     username: str
     role: str
+    active: bool
