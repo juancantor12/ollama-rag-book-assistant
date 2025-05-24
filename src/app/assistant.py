@@ -1,6 +1,6 @@
 """Module for the LLM assistant."""
 
-from typing import Union
+from typing import List, Union
 from chromadb.api.models.Collection import Collection
 from ollama import embed, generate
 import pymupdf
@@ -17,7 +17,7 @@ class Assistant:
         self.embeddings_collection = embeddings_collection
         self.book = pymupdf.open(f"{Utils.get_data_path()}/{self.book_filename}")
 
-    def get_rag_documents(self, question: str) -> list[str]:
+    def get_rag_documents(self, question: str) -> List[str]:
         """Retrieve related document references from the vectordb and pull related pages from the book."""
         response = embed(model=Utils.EMBEDDINGS_MODEL, input=question)
         results = self.embeddings_collection.query(

@@ -15,6 +15,10 @@ class Utils:
     CHAT_MODEL = "phi4:latest"
     EMBEDDINGS_MODEL = "mxbai-embed-large"
     N_DOCUMENTS = 3
+    # api
+    API_SECRET_KEY = "super_secret_key"
+    API_TOKEN_ALGORITHM = "HS256"
+    API_TOKEN_EXPIRE_MINUTES = 30
 
     def __init__(self, output_folder_name):
         self.output_folder_name = output_folder_name
