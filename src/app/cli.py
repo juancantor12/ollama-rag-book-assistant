@@ -47,7 +47,10 @@ class AppCLI:
                 if user_input == "exit":
                     Utils.logger.info("Finalizing session...")
                     break
-                assistant.ask(user_input)
+                data = assistant.ask(user_input)
+                print(data.get("answer", ""))
+                print("References: ")
+                print("\n".join(list(data.get("references", ""))))
         else:
             Utils.logger.critical(
                 "Embeddings database has not been generated or cannot be found, run generatedb first"

@@ -1,4 +1,4 @@
-"""Data layer for the api users."""
+"""Data layer for the api users. This module is UNUSED for now but will repace ChromaDB access in other modules"""
 
 from typing import List, Union
 from chromadb import PersistentClient
@@ -8,11 +8,10 @@ from app.utils import Utils
 
 class Database:
     """Data layer for the api users."""
+
     def __init__(self):
         Utils.logger.info("Initializing users db at data/")
-        self.chromaclient = PersistentClient(
-            path=str(Utils.get_data_path())
-        )
+        self.chromaclient = PersistentClient(path=str(Utils.get_data_path()))
 
     def create_collection(
         self, collection_name: str, overwrite: bool = False
@@ -34,7 +33,9 @@ class Database:
                 self.delete_collection(collection_name)
                 Utils.logger.info("Creating collection '%s'...", collection_name)
                 return self.chromaclient.create_collection(name=collection_name)
-            Utils.logger.error("Unable to create collection '%s'. Already exists.", collection_name)
+            Utils.logger.error(
+                "Unable to create collection '%s'. Already exists.", collection_name
+            )
             return None
         Utils.logger.info("Creating collection '%s'...", collection_name)
         return self.chromaclient.create_collection(name=collection_name)
@@ -65,4 +66,6 @@ class Database:
         if collection_name in self.list_collections():
             Utils.logger.warning("Deleting collection '%s'", collection_name)
             self.chromaclient.delete_collection(collection_name)
-        Utils.logger.error("Unable to delete collection '%s'. Not found.", collection_name)
+        Utils.logger.error(
+            "Unable to delete collection '%s'. Not found.", collection_name
+        )

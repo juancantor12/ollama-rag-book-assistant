@@ -2,14 +2,18 @@
 
 from pydantic import BaseModel
 
-class UserCreate(BaseModel):
+
+class UserCreateSchema(BaseModel):
     """User creation schema."""
+
     username: str
     password: str
     role: str
 
-class UserGet(BaseModel):
+
+class UserGetSchema(BaseModel):
     """User retrieval schema."""
+
     idx: int
     username: str
     role: str

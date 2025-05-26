@@ -1,42 +1,42 @@
-"""DB Model for the api roles."""
+"""DB Model for the api RBAC roles."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from typing import List
+from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import relationship
 from api.db import Base
-from api.models.role import Role  # pylint: disable=unused-import
+from api.models.permission import Permission  # pylint: disable=unused-import
 
-class User(Base):
-    """DB Models for the api users."""
-    __tablename__ = 'users'
+# Many-to-many relation with permission
+role_permission = Table(
+    "role_permission",
+    Base.metadata,
+    Column("role_idx", ForeignKey("roles.idx"), primary_key=True),
+    Column("permission_idx", ForeignKey("permissions.idx"), primary_key=True),
+)
+
+
+class Role(Base):
+    """DB Model for the api RBAC roles."""
+
+    __tablename__ = "roles"
 
     idx = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False)
-    role_id = Column(Integer, ForeignKey('roles.idx'), nullable=True)
-    active = Column(Boolean, default=True)
-    role = relationship("Role", backref="users", lazy="joined")
+    name = Column(String, unique=True, nullable=False)
+    permissions = relationship(
+        Permission, secondary=role_permission, back_populates="roles"
+    )
 
-    def __init__(
-        self, username: str, password: str, role_id: int, active: bool = True
-    ):
-        """Constructor to initialize user data."""
-        self.username = username
-        self.password = password
-        self.role_id = role_id
-        self.active = active
+    def __init__(self, name: str):
+        self.name = name
 
-    def check_permission(self, permission: str) -> bool:
+    def get_role_permissions(self) -> List[str]:
         """Checks if the user has a specific permission."""
-        if permission in self.role.permissions:
-            return True
-        return False
+        return [permission.name for permission in self.permissions]
 
     def as_dict(self):
         """Convert the model to a dictionary"""
         return {
             "idx": self.idx,
-            "username": self.username,
-            "password": self.password,
-            "role_id": self.role_id,
-            "active": self.active
+            "name": self.name,
+            "permissions": self.get_role_permissions(),
         }

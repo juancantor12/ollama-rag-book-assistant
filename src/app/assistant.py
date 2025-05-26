@@ -31,9 +31,7 @@ class Assistant:
             page = metadata["page"]
             if page not in pages:
                 surrounding_pages = [page - 1, page, page + 1]
-                reference = (
-                    f"From {metadata["title"]} (pages {', '.join([str(pg + 1) for pg in surrounding_pages])})"
-                )
+                reference = f"From {metadata["title"]} (pages {', '.join([str(pg + 1) for pg in surrounding_pages])})"
                 for surrounding_page in surrounding_pages:
                     pages.add(surrounding_page)
                     rag_documents += (
@@ -43,19 +41,17 @@ class Assistant:
                 references.add(reference)
         return rag_documents, references
 
-    def ask(self, question: str):
+    def ask(self, question: str) -> dict:
         """Ask the LLM model a question, the function calls the embeedings db for context."""
         rag_documents, references = self.get_rag_documents(question)
         output = generate(
             model=Utils.CHAT_MODEL,
             prompt=(
-                f"The user will make a question about the book {self.book.metadata['title']}"
-                f"from the authors: {self.book.metadata['author']}"
+                f"The user will make a question about the book {self.book.metadata.get('title', '')}"
+                f"from the authors: {self.book.metadata.get('author', '')}"
                 "The RAG system indentified a related page from the book."
                 f"These are previou, actual page and next page from the book to provide context: {rag_documents}."
                 f"Based on those pages respond to this user question: {question}"
             ),
         )
-        print(output.get("response", ""))
-        print("References: ")
-        print("\n".join(list(references)))
+        return {"answer": output.get("response", ""), "references": references}

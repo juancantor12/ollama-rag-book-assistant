@@ -18,13 +18,14 @@ class Utils:
     # api
     API_SECRET_KEY = "super_secret_key"
     API_TOKEN_ALGORITHM = "HS256"
-    API_TOKEN_EXPIRE_MINUTES = 30
+    API_TOKEN_EXPIRE_MINUTES = 10
+    API_DB_NAME = "users.db"
 
     def __init__(self, output_folder_name):
         self.output_folder_name = output_folder_name
 
     @staticmethod
-    def get_output_path(output_folder_name: str, create: bool = False) -> str:
+    def get_output_path(output_folder_name: str, create: bool = False) -> Path:
         """
         Returns the absolute output path for a given folder name.
 
@@ -43,7 +44,7 @@ class Utils:
         return output_path
 
     @staticmethod
-    def get_data_path() -> str:
+    def get_data_path() -> Path:
         """
         Returns the absolute data path.
 
@@ -118,3 +119,7 @@ class Utils:
                 return None
             return None
         return None
+
+    @staticmethod
+    def get_api_db_path() -> Path:
+        return Utils.get_data_path() / Utils.API_DB_NAME

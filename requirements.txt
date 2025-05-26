@@ -11,5 +11,5 @@ fastapi
 uvicorn
 pydantic
 pyjwt
-bcrypt
+passlib
 SQLAlchemy
