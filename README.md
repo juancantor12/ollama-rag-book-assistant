@@ -30,6 +30,7 @@ git clone https://github.com/juancantor12/ollama-rag-book-assistant.git
 cd {repo}
 ```
 ### 2. Seup environment, either with run.sh on linux or run.ps1 on windows  
+Take the .env.sample and save your own .env file, with the needed modifications.
 For linux soyboys it's advised to setup a virtual environment and activate it first.  
 then  
 

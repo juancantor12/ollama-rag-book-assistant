@@ -1,25 +1,30 @@
 """Shared utilities for the app."""
 
+import os
 from pathlib import Path
 from typing import Union
+from dotenv import load_dotenv
 from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
 
 
+load_dotenv(dotenv_path = Path(__file__).resolve().parents[2] / ".env" )
+
 class Utils:
     """Utilities for the CV builder."""
 
-    logger = None
-    COLLECTION_NAME = "embeddings"
-    DEFAULT_DB_FILENAME = "chroma.sqlite3"
-    CHAT_MODEL = "phi4:latest"
-    EMBEDDINGS_MODEL = "mxbai-embed-large"
-    N_DOCUMENTS = 3
-    # api
-    API_SECRET_KEY = "super_secret_key"
-    API_TOKEN_ALGORITHM = "HS256"
-    API_TOKEN_EXPIRE_MINUTES = 10
-    API_DB_NAME = "users.db"
+    # Sensitive
+    API_SECRET_KEY = os.getenv("API_SECRET_KEY")
+    API_TOKEN_ALGORITHM = os.getenv("API_TOKEN_ALGORITHM")
+    API_TOKEN_EXPIRE_MINUTES = int(os.getenv("API_TOKEN_EXPIRE_MINUTES", "10"))
+    API_DB_NAME = os.getenv("API_DB_NAME", "users.db")
+
+    # Environment-specific
+    COLLECTION_NAME = os.getenv("COLLECTION_NAME")
+    DEFAULT_DB_FILENAME = os.getenv("DEFAULT_DB_FILENAME")
+    CHAT_MODEL = os.getenv("CHAT_MODEL")
+    EMBEDDINGS_MODEL = os.getenv("EMBEDDINGS_MODEL")
+    N_DOCUMENTS = os.getenv("N_DOCUMENTS")
 
     def __init__(self, output_folder_name):
         self.output_folder_name = output_folder_name
@@ -122,4 +127,5 @@ class Utils:
 
     @staticmethod
     def get_api_db_path() -> Path:
+        """Returns the api DB path."""
         return Utils.get_data_path() / Utils.API_DB_NAME
