@@ -71,5 +71,6 @@ def verify_token(token: str) -> dict:
     except jwt.PyJWTError as error:
         Utils.logger.error("Unable to veiry token: %s", error)
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
         ) from error

@@ -24,6 +24,7 @@ execute_action() {
     precommit_steps=("-format" "-lint" "-security" "-audit" "-test")
     setup_steps=("-install" "-format" "-lint" "-security" "-audit" "-test")
     case $1 in
+        "-api") make launch-api ;;
         "-install") make install-dependencies ;;
         "-format") make format-code ;;
         "-lint") make lint-code ;;

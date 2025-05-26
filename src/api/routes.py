@@ -65,7 +65,7 @@ async def ask_question(query: AskSchema, _=Depends(require_permission("ask"))):
 
 
 @router.get("/admin/create_db_tables")
-async def create_db_tables(_=Depends(require_permission("create_db_tables"))):
+async def create_db_tables():  # _=Depends(require_permission("create_db_tables"))
     """Endpoint for admins to generate the api DB tables."""
     db = Database()
     if db.create_all_tables():

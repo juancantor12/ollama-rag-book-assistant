@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from api.db import Base
-from api.models.role import role_permission, Role  # pylint: disable=unused-import
+from api.models.role_permission import role_permission
 
 
 class Permission(Base):
@@ -14,7 +14,7 @@ class Permission(Base):
 
     idx = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True, nullable=False)
-    roles = relationship(Role, secondary=role_permission, back_populates="permissions")
+    roles = relationship("Role", secondary=role_permission, back_populates="permissions")
 
     def __init__(self, name: str):
         self.name = name

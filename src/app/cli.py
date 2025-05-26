@@ -1,11 +1,13 @@
 """Entry point for the application."""
 
 import argparse
+from pathlib import Path
 import sys
-from .assistant import Assistant
-from .generate_embeddings import EmbeddingsGenerator
-from .utils import Utils
-from .logging import setup_logging
+from dotenv import load_dotenv
+from app.assistant import Assistant
+from app.generate_embeddings import EmbeddingsGenerator
+from app.utils import Utils
+from app.logging import setup_logging
 
 
 class AppCLI:
@@ -64,6 +66,7 @@ class AppCLI:
 
 
 if __name__ == "__main__":
+    load_dotenv(dotenv_path = Path(__file__).resolve().parents[2] / ".env" )
     valid_actions = ["generatedb", "ask", "all"]
     parser = argparse.ArgumentParser(description="AI app")
     parser.add_argument(

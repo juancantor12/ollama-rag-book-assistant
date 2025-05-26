@@ -3,16 +3,13 @@
 import os
 from pathlib import Path
 from typing import Union
-from dotenv import load_dotenv
 from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
 
 
-load_dotenv(dotenv_path = Path(__file__).resolve().parents[2] / ".env" )
-
 class Utils:
     """Utilities for the CV builder."""
-
+    logger = None
     # Sensitive
     API_SECRET_KEY = os.getenv("API_SECRET_KEY")
     API_TOKEN_ALGORITHM = os.getenv("API_TOKEN_ALGORITHM")

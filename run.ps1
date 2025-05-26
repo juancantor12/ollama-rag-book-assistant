@@ -1,4 +1,5 @@
 param (
+    [switch]$api,
     [string]$book,       # Name of the book in /data/, the same name will be used for the output/ folder where user generated files will reside
     [string]$actions,    # Which actions to perform, if empty, all are executed
     [switch]$install,
@@ -25,6 +26,7 @@ function Execute-Action {
         "security" { bandit -r src/ }
         "audit" { pip-audit -r requirements.txt }
         "test" { pytest tests/ -vv }
+        "api" { uvicorn --app-dir src api.main:run --reload }
     }
 }
 
@@ -32,6 +34,7 @@ if ($help){
     Write-Host (
         @(
             "Usage:",
+            "-api           Run the fastapi version of the app.",
             "-book          Name of the book in /data/, the same name will be used for the output/ folder where user generated files will reside",
             "-actions       List of actions to perform (dash-separated, no spaces). Defaults to 'all'.",
             "-install       Installs dependencies",
@@ -53,6 +56,7 @@ if ($help){
     exit 0
 }
 
+if ($api) { Execute-Action -action "api"; exit }
 if ($install) { Execute-Action -action "install"; exit }
 if ($format) { Execute-Action -action "format"; exit }
 if ($lint) { Execute-Action -action "lint"; exit }
