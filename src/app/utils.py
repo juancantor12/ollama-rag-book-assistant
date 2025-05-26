@@ -9,6 +9,7 @@ from chromadb.api.models.Collection import Collection
 
 class Utils:
     """Utilities for the CV builder."""
+
     logger = None
     # Sensitive
     API_SECRET_KEY = os.getenv("API_SECRET_KEY")
@@ -17,11 +18,11 @@ class Utils:
     API_DB_NAME = os.getenv("API_DB_NAME", "users.db")
 
     # Environment-specific
-    COLLECTION_NAME = os.getenv("COLLECTION_NAME")
-    DEFAULT_DB_FILENAME = os.getenv("DEFAULT_DB_FILENAME")
+    COLLECTION_NAME = os.getenv("COLLECTION_NAME", "embeddings")
+    DEFAULT_DB_FILENAME = os.getenv("DEFAULT_DB_FILENAME", "chroma.sqlite3")
     CHAT_MODEL = os.getenv("CHAT_MODEL")
     EMBEDDINGS_MODEL = os.getenv("EMBEDDINGS_MODEL")
-    N_DOCUMENTS = os.getenv("N_DOCUMENTS")
+    N_DOCUMENTS = int(os.getenv("N_DOCUMENTS", "3"))
 
     def __init__(self, output_folder_name):
         self.output_folder_name = output_folder_name

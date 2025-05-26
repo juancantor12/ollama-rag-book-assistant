@@ -66,7 +66,7 @@ class AppCLI:
 
 
 if __name__ == "__main__":
-    load_dotenv(dotenv_path = Path(__file__).resolve().parents[2] / ".env" )
+    load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / ".env")
     valid_actions = ["generatedb", "ask", "all"]
     parser = argparse.ArgumentParser(description="AI app")
     parser.add_argument(
