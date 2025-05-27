@@ -7,6 +7,7 @@ from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
 from app.logging import setup_logging
 
+
 class Utils:
     """Utilities for the CV builder."""
 

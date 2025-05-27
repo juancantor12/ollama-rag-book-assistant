@@ -12,6 +12,7 @@ from app.utils import Utils
 
 router = APIRouter(tags=["client"])
 
+
 @router.post("/login/")
 async def login(login_data: LoginRequestSchema):
     """Endpoint to log in and generate a token."""

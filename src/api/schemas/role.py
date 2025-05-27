@@ -6,11 +6,14 @@ from pydantic import BaseModel
 
 class CreateRoleSchema(BaseModel):
     """CreateSchema."""
+
     name: str
     permissions: List[int]
 
+
 class UpdateRoleSchema(BaseModel):
     """Update schema"""
+
     idx: int
     name: str
     permissions: List[int]
@@ -18,5 +21,6 @@ class UpdateRoleSchema(BaseModel):
 
 class ListRoleSchema(BaseModel):
     """List schmea."""
+
     limit: int = 1000
     offset: int = 0

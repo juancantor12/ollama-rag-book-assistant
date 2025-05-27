@@ -2,13 +2,16 @@
 
 # from typing import List
 from fastapi import APIRouter, HTTPException
+
 # from api.controllers.rbac import require_permission
 # from api.controllers.user import UserController
 from api.db import Database
+
 # from api.schemas.user import CreateUserSchema, ListUserSchema, UpdateUserSchema
 
 router = APIRouter(tags=["admin"])
 db = Database()
+
 
 @router.get("/admin/create_db_tables")
 # _=Depends(require_permission("create_db_tables"))
@@ -16,7 +19,8 @@ async def create_db_tables():
     """Endpoint for admins to generate the api DB tables."""
     if db.create_all_tables():
         return {"message": "The database tables have been created"}
-    raise HTTPException( status_code = 500)
+    raise HTTPException(status_code=500)
+
 
 # @router.post("/admin/users/create")
 # async def create_user(users: List[CreateUserSchema]):

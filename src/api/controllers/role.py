@@ -8,8 +8,10 @@ from api.models.role import Role
 from api.db import Database
 from api.schemas.role import CreateRoleSchema, UpdateRoleSchema
 
+
 class RoleController:
     """Controller for the Role model."""
+
     def __init__(self):
         self.db = Database()
 
@@ -17,10 +19,12 @@ class RoleController:
         """Adds roles to the database."""
         new_roles = []
         for data in roles:
-            permissions = self.db.session.query(Permission).filter(
-                Permission.idx.in_(data.permissions)
-            ).all()
-            new_roles.append( Role(name = data.name, permissions = permissions) )
+            permissions = (
+                self.db.session.query(Permission)
+                .filter(Permission.idx.in_(data.permissions))
+                .all()
+            )
+            new_roles.append(Role(name=data.name, permissions=permissions))
         ln = len(new_roles)
         self.db.session.add_all(new_roles)
         self.db.session.commit()
@@ -28,7 +32,12 @@ class RoleController:
 
     def list(self, limit: int = 1000, offset: int = 0) -> List[Role]:
         """List all roles."""
-        stmt = select(Role).limit(limit).offset(offset).options(selectinload(Role.permissions))
+        stmt = (
+            select(Role)
+            .limit(limit)
+            .offset(offset)
+            .options(selectinload(Role.permissions))
+        )
         return list(self.db.session.scalars(stmt))
 
     def update(self, roles: List[UpdateRoleSchema]) -> int:
@@ -38,9 +47,11 @@ class RoleController:
             role = self.db.session.query(Role).get(role_data.idx)
             if not role:
                 return None
-            updated_permissions = self.db.session.query(Permission).filter(
-                Permission.idx.in_(role_data.permissions)
-            ).all()
+            updated_permissions = (
+                self.db.session.query(Permission)
+                .filter(Permission.idx.in_(role_data.permissions))
+                .all()
+            )
             role.permissions = []
             role.permissions.extend(updated_permissions)
             role.name = role_data.name

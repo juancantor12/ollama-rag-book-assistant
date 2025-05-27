@@ -6,8 +6,10 @@ from api.models.permission import Permission
 from api.db import Database
 from api.schemas.permission import CreatePermissionSchema, UpdatePermissionSchema
 
+
 class PermissionController:
     """Controller for the Permission model."""
+
     def __init__(self):
         self.db = Database()
 
@@ -15,9 +17,7 @@ class PermissionController:
         """Adds permissions to the database."""
         new_permissions = []
         for data in permissions:
-            new_permissions.append(
-                Permission(name = data.name)
-            )
+            new_permissions.append(Permission(name=data.name))
         ln = len(new_permissions)
         self.db.session.add_all(new_permissions)
         self.db.session.commit()
@@ -31,10 +31,16 @@ class PermissionController:
     def update(self, permissions: List[UpdatePermissionSchema]) -> int:
         """Adds permissions to the database."""
         ln = len(permissions)
-        stmt = update(Permission).where(
-            Permission.idx.in_([p.idx for p in permissions])
-        ).values(
-            { 'name': case( { p.idx: p.name for p in permissions}, value=Permission.idx ) }
+        stmt = (
+            update(Permission)
+            .where(Permission.idx.in_([p.idx for p in permissions]))
+            .values(
+                {
+                    "name": case(
+                        {p.idx: p.name for p in permissions}, value=Permission.idx
+                    )
+                }
+            )
         )
         self.db.session.execute(stmt)
         self.db.session.commit()

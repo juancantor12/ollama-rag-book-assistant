@@ -16,7 +16,10 @@ class Role(Base):
     idx = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True, nullable=False)
     permissions = relationship(
-        Permission, secondary=role_permission, back_populates="roles", passive_deletes=True
+        Permission,
+        secondary=role_permission,
+        back_populates="roles",
+        passive_deletes=True,
     )
 
     def __init__(self, name: str, permissions: List[Permission]):

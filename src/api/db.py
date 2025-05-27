@@ -10,12 +10,14 @@ from app.utils import Utils
 
 Base = declarative_base()
 
+
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, _connection_record):
     """Listener to enable foreign keys on sqlite connections."""
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
+
 
 class Database:
     """Data layer for the API using SQLAlchemy."""

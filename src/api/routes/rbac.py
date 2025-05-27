@@ -2,11 +2,16 @@
 
 from typing import List
 from fastapi import APIRouter, HTTPException
+
 # from api.controllers.rbac import require_permission
 from api.controllers.permission import PermissionController
 from api.controllers.role import RoleController
 from api.db import Database
-from api.schemas.permission import CreatePermissionSchema, ListPermissionSchema, UpdatePermissionSchema
+from api.schemas.permission import (
+    CreatePermissionSchema,
+    ListPermissionSchema,
+    UpdatePermissionSchema,
+)
 from api.schemas.role import CreateRoleSchema, ListRoleSchema, UpdateRoleSchema
 
 
@@ -14,14 +19,16 @@ router = APIRouter(tags=["rbac"])
 db = Database()
 # _=Depends(require_permission("create_db_tables"))
 
+
 @router.post("/admin/permissions/create")
 async def create_permission(permissions: List[CreatePermissionSchema]):
     """Endpoint for admins to create permissions on the RBAC."""
     permission_controller = PermissionController()
     ln = permission_controller.create(permissions)
     if ln is not None:
-        return { "created_records": ln }
-    raise HTTPException( status_code = 500)
+        return {"created_records": ln}
+    raise HTTPException(status_code=500)
+
 
 @router.post("/admin/permissions/list")
 async def list_permissions(query: ListPermissionSchema):
@@ -29,8 +36,9 @@ async def list_permissions(query: ListPermissionSchema):
     permission_controller = PermissionController()
     permissions = permission_controller.list(query.limit, query.offset)
     if permissions is not None:
-        return { "permissions": permissions }
-    raise HTTPException( status_code = 500)
+        return {"permissions": permissions}
+    raise HTTPException(status_code=500)
+
 
 @router.post("/admin/permissions/delete")
 async def delete_permissions(idxs: List[int]):
@@ -39,7 +47,8 @@ async def delete_permissions(idxs: List[int]):
     ln = permission_controller.delete(idxs)
     if ln is not None:
         return {"deleted_record": ln}
-    raise HTTPException( status_code = 500)
+    raise HTTPException(status_code=500)
+
 
 @router.post("/admin/permissions/update")
 async def update_permissions(permissions: List[UpdatePermissionSchema]):
@@ -47,8 +56,9 @@ async def update_permissions(permissions: List[UpdatePermissionSchema]):
     permission_controller = PermissionController()
     ln = permission_controller.update(permissions)
     if ln is not None:
-        return {"updated_records": ln }
-    raise HTTPException(status_code = 500)
+        return {"updated_records": ln}
+    raise HTTPException(status_code=500)
+
 
 @router.post("/admin/roles/create")
 async def create_role(roles: List[CreateRoleSchema]):
@@ -56,8 +66,9 @@ async def create_role(roles: List[CreateRoleSchema]):
     role_controller = RoleController()
     ln = role_controller.create(roles)
     if ln is not None:
-        return { "created_records": ln }
-    raise HTTPException( status_code = 500)
+        return {"created_records": ln}
+    raise HTTPException(status_code=500)
+
 
 @router.post("/admin/roles/list")
 async def list_roles(query: ListRoleSchema):
@@ -65,8 +76,9 @@ async def list_roles(query: ListRoleSchema):
     role_controller = RoleController()
     roles = role_controller.list(query.limit, query.offset)
     if roles is not None:
-        return { "roles": roles }
-    raise HTTPException( status_code = 500)
+        return {"roles": roles}
+    raise HTTPException(status_code=500)
+
 
 @router.post("/admin/roles/delete")
 async def delete_roles(idxs: List[int]):
@@ -75,7 +87,8 @@ async def delete_roles(idxs: List[int]):
     ln = role_controller.delete(idxs)
     if ln is not None:
         return {"deleted_record": ln}
-    raise HTTPException( status_code = 500)
+    raise HTTPException(status_code=500)
+
 
 @router.post("/admin/roles/update")
 async def update_roles(roles: List[UpdateRoleSchema]):
@@ -83,5 +96,5 @@ async def update_roles(roles: List[UpdateRoleSchema]):
     role_controller = RoleController()
     ln = role_controller.update(roles)
     if ln is not None:
-        return {"updated_records": ln }
-    raise HTTPException(status_code = 500)
+        return {"updated_records": ln}
+    raise HTTPException(status_code=500)

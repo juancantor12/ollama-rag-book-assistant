@@ -76,6 +76,7 @@ def verify_token(token: str) -> dict:
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         ) from error
 
+
 def login_request(login_data):
     """Attemps to log in auser and return an access token."""
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
