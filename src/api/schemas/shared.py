@@ -1,6 +1,5 @@
-"""Pydantic schemas for Role validation."""
+"""Pydantic schemas for shared validation."""
 
-from typing import List
 from pydantic import BaseModel
 
 
