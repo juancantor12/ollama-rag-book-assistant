@@ -3,7 +3,9 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import Depends, Header, HTTPException, status
+from passlib.context import CryptContext
 import jwt
+from api.db import Database
 from api.models.user import User
 from app.utils import Utils
 
@@ -73,3 +75,15 @@ def verify_token(token: str) -> dict:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         ) from error
+
+def login_request(login_data):
+    """Attemps to log in auser and return an access token."""
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    db = Database()
+    user = db.session.query(User).filter(User.username == login_data.username).first()
+    if not user or not pwd_context.verify(login_data.password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
+    token_data = {"idx": user.idx, "permissions": user.role.get_role_permissions()}
+    return generate_access_token(token_data)

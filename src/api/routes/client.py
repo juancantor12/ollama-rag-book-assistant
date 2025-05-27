@@ -1,34 +1,21 @@
-"""Entry point for the api ."""
+"""Client routes"""
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from passlib.context import CryptContext
-from api.auth import generate_access_token
-from api.db import Database
-from api.models.user import User
+from fastapi import APIRouter, Depends, HTTPException
+from api.controllers.auth import login_request
 from api.schemas.actions import AskSchema, GenerateEmbeddingsSchema
 from api.schemas.auth import LoginRequestSchema
-from api.rbac import require_permission
+from api.controllers.rbac import require_permission
 from app.assistant import Assistant
 from app.generate_embeddings import EmbeddingsGenerator
 from app.utils import Utils
-from app.logging import setup_logging
 
 
-router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+router = APIRouter(tags=["client"])
 
 @router.post("/login/")
 async def login(login_data: LoginRequestSchema):
     """Endpoint to log in and generate a token."""
-    db = Database()
-    user = db.session.query(User).filter(User.username == login_data.username).first()
-    if not user or not pwd_context.verify(login_data.password, user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-        )
-    token_data = {"idx": user.idx, "permissions": user.role.get_role_permissions()}
-    access_token = generate_access_token(token_data)
+    access_token = login_request(login_data)
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -40,7 +27,7 @@ async def generate_embeddings(
     """Endpoint to generate the embeddings database."""
     book_filename = book_data.book_filename
     output_folder = Utils.strip_extension(book_filename)
-    Utils.logger = setup_logging(output_folder)
+    # Utils.logger = setup_logging(output_folder)
     embeddings_generator = EmbeddingsGenerator(book_filename)
     embeddings = embeddings_generator.generate_embeddings()
     if embeddings:
@@ -62,15 +49,3 @@ async def ask_question(query: AskSchema, _=Depends(require_permission("ask"))):
     assistant = Assistant(query.book_filename, embeddings_collection)
     data = assistant.ask(query.question)
     return data
-
-
-@router.get("/admin/create_db_tables")
-async def create_db_tables():  # _=Depends(require_permission("create_db_tables"))
-    """Endpoint for admins to generate the api DB tables."""
-    db = Database()
-    if db.create_all_tables():
-        return {"message": "The database tables have been created"}
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="The database tables creating failed, check logs for details.",
-    )

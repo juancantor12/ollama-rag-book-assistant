@@ -2,7 +2,7 @@
 
 from typing import Callable
 from fastapi import Depends, HTTPException, status
-from api.auth import get_current_user_permissions
+from api.controllers.auth import get_current_user_permissions
 from api.models.user import User
 
 

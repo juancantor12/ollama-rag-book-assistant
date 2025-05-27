@@ -5,12 +5,12 @@ from pathlib import Path
 from typing import Union
 from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
-
+from app.logging import setup_logging
 
 class Utils:
     """Utilities for the CV builder."""
 
-    logger = None
+    logger = setup_logging("default")
     # Sensitive
     API_SECRET_KEY = os.getenv("API_SECRET_KEY")
     API_TOKEN_ALGORITHM = os.getenv("API_TOKEN_ALGORITHM")
