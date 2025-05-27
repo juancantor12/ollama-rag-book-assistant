@@ -5,7 +5,10 @@ from pathlib import Path
 from typing import Union
 from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
+from dotenv import load_dotenv
 from app.logging import setup_logging
+
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / ".env")
 
 
 class Utils:

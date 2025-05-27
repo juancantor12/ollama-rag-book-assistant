@@ -14,10 +14,3 @@ class UpdatePermissionSchema(BaseModel):
 
     idx: int
     name: str
-
-
-class ListPermissionSchema(BaseModel):
-    """List schmea."""
-
-    limit: int
-    offset: int

@@ -7,12 +7,9 @@ from fastapi import APIRouter, HTTPException
 from api.controllers.permission import PermissionController
 from api.controllers.role import RoleController
 from api.db import Database
-from api.schemas.permission import (
-    CreatePermissionSchema,
-    ListPermissionSchema,
-    UpdatePermissionSchema,
-)
-from api.schemas.role import CreateRoleSchema, ListRoleSchema, UpdateRoleSchema
+from api.schemas.permission import CreatePermissionSchema, UpdatePermissionSchema
+from api.schemas.role import CreateRoleSchema, UpdateRoleSchema
+from api.schemas.shared import ListSchema
 
 
 router = APIRouter(tags=["rbac"])
@@ -31,7 +28,7 @@ async def create_permission(permissions: List[CreatePermissionSchema]):
 
 
 @router.post("/admin/permissions/list")
-async def list_permissions(query: ListPermissionSchema):
+async def list_permissions(query: ListSchema):
     """Endpoint for admins to see permissions on the RBAC."""
     permission_controller = PermissionController()
     permissions = permission_controller.list(query.limit, query.offset)
@@ -71,7 +68,7 @@ async def create_role(roles: List[CreateRoleSchema]):
 
 
 @router.post("/admin/roles/list")
-async def list_roles(query: ListRoleSchema):
+async def list_roles(query: ListSchema):
     """Endpoint for admins to see roles on the RBAC."""
     role_controller = RoleController()
     roles = role_controller.list(query.limit, query.offset)

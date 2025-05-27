@@ -17,10 +17,3 @@ class UpdateRoleSchema(BaseModel):
     idx: int
     name: str
     permissions: List[int]
-
-
-class ListRoleSchema(BaseModel):
-    """List schmea."""
-
-    limit: int = 1000
-    offset: int = 0

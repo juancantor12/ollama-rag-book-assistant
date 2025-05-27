@@ -41,11 +41,15 @@ async def generate_embeddings(
 @router.post("/ask/")
 async def ask_question(query: AskSchema, _=Depends(require_permission("ask"))):
     """Endpoint for asking a question."""
-    embeddings_collection = Utils.get_embeddings_db(query.book_filename)
+    output_folder = Utils.strip_extension(query.book_filename)
+    embeddings_collection = Utils.get_embeddings_db(output_folder)
     if not embeddings_collection:
         raise HTTPException(
             status_code=400,
-            detail="Embeddings not generated. Please run 'generate_embeddings' first.",
+            detail=(
+                f"Embeddings for {query.book_filename} not generated."
+                " Please run 'generate_embeddings' first."
+            ),
         )
     assistant = Assistant(query.book_filename, embeddings_collection)
     data = assistant.ask(query.question)

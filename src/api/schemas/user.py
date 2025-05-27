@@ -1,18 +1,23 @@
-# """Pydantic schemas for User validation."""
+"""Pydantic schemas for User validation."""
 
-# from pydantic import BaseModel
-
-
-# class UserCreateRequestSchema(BaseModel):
-#     """User creation schema."""
-#     username: str
-#     password: str
-#     role: str
+from typing import Optional
+from pydantic import BaseModel
 
 
-# # class GetUserRequestSchema(BaseModel):
-# #     """User retrieval schema."""
-# #     idx: int
-# #     username: str
-# #     role: str
-# #     active: bool
+class CreateUserSchema(BaseModel):
+    """CreateSchema."""
+
+    username: str
+    password: str
+    role_id: int
+    active: bool
+
+
+class UpdateUserSchema(BaseModel):
+    """Update schema"""
+
+    idx: int
+    username: str
+    password: Optional[str] = None
+    role_id: int
+    active: bool

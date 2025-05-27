@@ -51,6 +51,11 @@ def generate_access_token(
         )
     token_data = data.copy()
     token_data.update({"exp": expiration})
+    Utils.logger.info(token_data)
+    Utils.logger.info(
+        Utils.API_SECRET_KEY,
+    )
+    Utils.logger.info(Utils.API_TOKEN_ALGORITHM)
     encoded_jwt = jwt.encode(
         token_data, Utils.API_SECRET_KEY, algorithm=Utils.API_TOKEN_ALGORITHM
     )
