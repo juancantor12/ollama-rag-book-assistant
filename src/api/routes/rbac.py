@@ -1,9 +1,8 @@
 """User routes."""
 
 from typing import List
-from fastapi import APIRouter, HTTPException
-
-# from api.controllers.rbac import require_permission
+from fastapi import APIRouter, Depends, HTTPException
+from api.controllers.rbac import require_permission
 from api.controllers.permission import PermissionController
 from api.controllers.role import RoleController
 from api.db import Database
@@ -14,11 +13,13 @@ from api.schemas.shared import ListSchema
 
 router = APIRouter(tags=["rbac"])
 db = Database()
-# _=Depends(require_permission("create_db_tables"))
 
 
 @router.post("/admin/permissions/create")
-async def create_permission(permissions: List[CreatePermissionSchema]):
+async def create_permission(
+    permissions: List[CreatePermissionSchema],
+    _=Depends(require_permission("manage_users")),
+):
     """Endpoint for admins to create permissions on the RBAC."""
     permission_controller = PermissionController()
     ln = permission_controller.create(permissions)
@@ -28,7 +29,9 @@ async def create_permission(permissions: List[CreatePermissionSchema]):
 
 
 @router.post("/admin/permissions/list")
-async def list_permissions(query: ListSchema):
+async def list_permissions(
+    query: ListSchema, _=Depends(require_permission("manage_users"))
+):
     """Endpoint for admins to see permissions on the RBAC."""
     permission_controller = PermissionController()
     permissions = permission_controller.list(query.limit, query.offset)
@@ -38,7 +41,9 @@ async def list_permissions(query: ListSchema):
 
 
 @router.post("/admin/permissions/delete")
-async def delete_permissions(idxs: List[int]):
+async def delete_permissions(
+    idxs: List[int], _=Depends(require_permission("manage_users"))
+):
     """Endpoint for admins to delete permissions from the RBAC."""
     permission_controller = PermissionController()
     ln = permission_controller.delete(idxs)
@@ -48,7 +53,10 @@ async def delete_permissions(idxs: List[int]):
 
 
 @router.post("/admin/permissions/update")
-async def update_permissions(permissions: List[UpdatePermissionSchema]):
+async def update_permissions(
+    permissions: List[UpdatePermissionSchema],
+    _=Depends(require_permission("manage_users")),
+):
     """Endpoint for admins to update permissions on the RBAC."""
     permission_controller = PermissionController()
     ln = permission_controller.update(permissions)
@@ -58,7 +66,9 @@ async def update_permissions(permissions: List[UpdatePermissionSchema]):
 
 
 @router.post("/admin/roles/create")
-async def create_role(roles: List[CreateRoleSchema]):
+async def create_role(
+    roles: List[CreateRoleSchema], _=Depends(require_permission("manage_users"))
+):
     """Endpoint for admins to create roles on the RBAC."""
     role_controller = RoleController()
     ln = role_controller.create(roles)
@@ -68,7 +78,7 @@ async def create_role(roles: List[CreateRoleSchema]):
 
 
 @router.post("/admin/roles/list")
-async def list_roles(query: ListSchema):
+async def list_roles(query: ListSchema, _=Depends(require_permission("manage_users"))):
     """Endpoint for admins to see roles on the RBAC."""
     role_controller = RoleController()
     roles = role_controller.list(query.limit, query.offset)
@@ -78,7 +88,7 @@ async def list_roles(query: ListSchema):
 
 
 @router.post("/admin/roles/delete")
-async def delete_roles(idxs: List[int]):
+async def delete_roles(idxs: List[int], _=Depends(require_permission("manage_users"))):
     """Endpoint for admins to delete roles from the RBAC."""
     role_controller = RoleController()
     ln = role_controller.delete(idxs)
@@ -88,7 +98,9 @@ async def delete_roles(idxs: List[int]):
 
 
 @router.post("/admin/roles/update")
-async def update_roles(roles: List[UpdateRoleSchema]):
+async def update_roles(
+    roles: List[UpdateRoleSchema], _=Depends(require_permission("manage_users"))
+):
     """Endpoint for admins to update roles from the RBAC."""
     role_controller = RoleController()
     ln = role_controller.update(roles)
