@@ -31,7 +31,7 @@ class Assistant:
             page = metadata["page"]
             if page not in pages:
                 surrounding_pages = [page - 1, page, page + 1]
-                reference = f"From {metadata'"titl'"]} (pages {', '.join([str(pg + 1) for pg in surrounding_pages])})"
+                reference = f"From { metadata['title'] } (pages {', '.join([str(pg + 1) for pg in surrounding_pages])})"
                 for surrounding_page in surrounding_pages:
                     pages.add(surrounding_page)
                     rag_documents += (
