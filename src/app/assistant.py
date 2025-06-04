@@ -26,19 +26,18 @@ class Assistant:
         )
         rag_documents = ""
         pages = set()
-        references = set()
+        references = []
         for metadata in results["metadatas"][0]:
             page = metadata["page"]
-            if page not in pages:
-                surrounding_pages = [page - 1, page, page + 1]
-                reference = f"From { metadata['title'] } (pages {', '.join([str(pg + 1) for pg in surrounding_pages])})"
-                for surrounding_page in surrounding_pages:
+            surrounding_pages = [page - 1, page, page + 1]
+            for surrounding_page in surrounding_pages:
+                if surrounding_page not in pages:
                     pages.add(surrounding_page)
                     rag_documents += (
-                        f"\n{metadata['title']}, page {surrounding_page}: "
+                        f"\n{metadata["title"]}, page {surrounding_page}: "
                         f"\n{self.book.load_page(surrounding_page).get_text()}\n"
                     )
-                references.add(reference)
+            references.append({"section": metadata["title"], "pages": surrounding_pages})
         return rag_documents, references
 
     def ask(self, question: str) -> dict:
@@ -46,6 +45,10 @@ class Assistant:
         rag_documents, references = self.get_rag_documents(question)
         output = generate(
             model=Utils.CHAT_MODEL,
+            options={
+                "num_predict": 2048,  # Number of max tokens in the output
+                "num_ctx": 8196,  # Input + output context length
+            },
             prompt=(
                 f"The user will make a question about the book {self.book.metadata.get('title', '')}"
                 f"from the authors: {self.book.metadata.get('author', '')}"
