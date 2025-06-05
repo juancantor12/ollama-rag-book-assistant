@@ -1,6 +1,7 @@
 """Client routes"""
 
 from fastapi import APIRouter, Depends, HTTPException
+import ollama
 from api.controllers.auth import login_request
 from api.schemas.actions import AskSchema, GenerateEmbeddingsSchema
 from api.schemas.auth import LoginRequestSchema
@@ -13,11 +14,21 @@ from app.utils import Utils
 router = APIRouter(tags=["client"])
 
 
+@router.get("/status/")
+async def status():
+    """Endpoint to check server status."""
+    try:
+        ollama.list()
+        return {"status": "ok"}
+    except Exception as e:
+        Utils.logger.critical("Ollama server is not up.")
+        raise HTTPException(status_code=503, detail="Ollama server is not up") from e
+
 @router.post("/login/")
 async def login(login_data: LoginRequestSchema):
     """Endpoint to log in and generate a token."""
     access_token = login_request(login_data)
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"token": access_token, "type": "bearer"}
 
 
 @router.post("/generate_embeddings/")
