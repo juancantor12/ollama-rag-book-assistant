@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Request, HTTPException, status
 from passlib.context import CryptContext
 import jwt
 from api.db import Database
@@ -10,14 +10,15 @@ from api.models.user import User
 from app.utils import Utils
 
 
-def get_token(authorization: str = Header(...)) -> str:
+def get_token(request: Request) -> str:
     """Extracts the token from the Authorization header."""
-    if not authorization.startswith("Bearer "):
+    token = request.cookies.get("token")
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authorization scheme",
+            detail="Missing access token",
         )
-    return authorization[len("Bearer ") :]
+    return token
 
 
 def get_current_user_permissions(token: str = Depends(get_token)) -> User:
@@ -92,4 +93,4 @@ def login_request(login_data):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
     token_data = {"idx": user.idx, "permissions": user.role.get_role_permissions()}
-    return generate_access_token(token_data)
+    return (generate_access_token(token_data), token_data["permissions"])

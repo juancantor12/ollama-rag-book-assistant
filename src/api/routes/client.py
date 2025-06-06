@@ -1,6 +1,6 @@
 """Client routes"""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 import ollama
 from api.controllers.auth import login_request
 from api.schemas.actions import AskSchema, GenerateEmbeddingsSchema
@@ -25,10 +25,16 @@ async def status():
         raise HTTPException(status_code=503, detail="Ollama server is not up") from e
 
 @router.post("/login/")
-async def login(login_data: LoginRequestSchema):
+async def login(login_data: LoginRequestSchema, response: Response):
     """Endpoint to log in and generate a token."""
-    access_token = login_request(login_data)
-    return {"token": access_token, "type": "bearer"}
+    access_token, permissions = login_request(login_data)
+    response.set_cookie(
+        key="token",
+        value=access_token,
+        httponly=True,
+        max_age=Utils.API_TOKEN_EXPIRE_MINUTES*60
+    )
+    return {"message": "Login successful", "permissions": permissions}
 
 
 @router.post("/generate_embeddings/")
@@ -52,6 +58,7 @@ async def generate_embeddings(
 @router.post("/ask/")
 async def ask_question(query: AskSchema, _=Depends(require_permission("ask"))):
     """Endpoint for asking a question."""
+    return {"book": query.book_filename, "quest": query.question}
     output_folder = Utils.strip_extension(query.book_filename)
     embeddings_collection = Utils.get_embeddings_db(output_folder)
     if not embeddings_collection:
