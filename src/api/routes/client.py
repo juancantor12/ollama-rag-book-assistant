@@ -1,5 +1,6 @@
 """Client routes"""
 
+# import time
 from fastapi import APIRouter, Depends, HTTPException, Response
 import ollama
 from api.controllers.auth import login_request
@@ -9,7 +10,6 @@ from api.controllers.rbac import require_permission
 from app.assistant import Assistant
 from app.generate_embeddings import EmbeddingsGenerator
 from app.utils import Utils
-
 
 router = APIRouter(tags=["client"])
 
@@ -32,7 +32,9 @@ async def login(login_data: LoginRequestSchema, response: Response):
         key="token",
         value=access_token,
         httponly=True,
-        max_age=Utils.API_TOKEN_EXPIRE_MINUTES*60
+        max_age=Utils.API_TOKEN_EXPIRE_MINUTES*60,
+        secure=True,
+        samesite="None"
     )
     return {"message": "Login successful", "permissions": permissions}
 
@@ -58,7 +60,13 @@ async def generate_embeddings(
 @router.post("/ask/")
 async def ask_question(query: AskSchema, _=Depends(require_permission("ask"))):
     """Endpoint for asking a question."""
-    return {"book": query.book_filename, "quest": query.question}
+    # time.sleep(2)
+    # return {
+    #     "answer": "Cool answer",
+    #     "references": [
+    #         {"section": "Random section.", "pages": [111, 222, 333]},
+    #     ]
+    # }
     output_folder = Utils.strip_extension(query.book_filename)
     embeddings_collection = Utils.get_embeddings_db(output_folder)
     if not embeddings_collection:
