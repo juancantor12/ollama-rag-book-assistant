@@ -33,11 +33,14 @@ class Assistant:
             for surrounding_page in surrounding_pages:
                 if surrounding_page not in pages:
                     pages.add(surrounding_page)
+                    title = metadata["title"]
                     rag_documents += (
-                        f"\n{metadata["title"]}, page {surrounding_page}: "
+                        f"\n{title}, page {surrounding_page}: "
                         f"\n{self.book.load_page(surrounding_page).get_text()}\n"
                     )
-            references.append({"section": metadata["title"], "pages": surrounding_pages})
+            references.append(
+                {"section": metadata["title"], "pages": surrounding_pages}
+            )
         return rag_documents, references
 
     def ask(self, question: str) -> dict:

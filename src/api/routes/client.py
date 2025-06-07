@@ -24,6 +24,7 @@ async def status():
         Utils.logger.critical("Ollama server is not up.")
         raise HTTPException(status_code=503, detail="Ollama server is not up") from e
 
+
 @router.post("/login/")
 async def login(login_data: LoginRequestSchema, response: Response):
     """Endpoint to log in and generate a token."""
@@ -32,9 +33,9 @@ async def login(login_data: LoginRequestSchema, response: Response):
         key="token",
         value=access_token,
         httponly=True,
-        max_age=Utils.API_TOKEN_EXPIRE_MINUTES*60,
+        max_age=Utils.API_TOKEN_EXPIRE_MINUTES * 60,
         secure=True,
-        samesite="None"
+        samesite="None",
     )
     return {"message": "Login successful", "permissions": permissions}
 
