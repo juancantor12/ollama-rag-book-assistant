@@ -3,10 +3,10 @@
 # import time
 from fastapi import APIRouter, Depends, HTTPException, Response
 import ollama
-from api.controllers.auth import login_request
+from api.controllers.auth import login_request, verify_token
+from api.controllers.rbac import require_permission
 from api.schemas.actions import AskSchema, GenerateEmbeddingsSchema
 from api.schemas.auth import LoginRequestSchema
-from api.controllers.rbac import require_permission
 from app.assistant import Assistant
 from app.generate_embeddings import EmbeddingsGenerator
 from app.utils import Utils
@@ -28,16 +28,21 @@ async def status():
 @router.post("/login/")
 async def login(login_data: LoginRequestSchema, response: Response):
     """Endpoint to log in and generate a token."""
-    access_token, permissions = login_request(login_data)
+    token, token_data = login_request(login_data)
     response.set_cookie(
         key="token",
-        value=access_token,
+        value=token,
         httponly=True,
-        max_age=Utils.API_TOKEN_EXPIRE_MINUTES * 60,
+        max_age=Utils.API_TOKEN_EXPIRE_MINUTES, #* 60,
         secure=True,
         samesite="None",
+        path="/"
     )
-    return {"message": "Login successful", "permissions": permissions}
+    return {
+        "message": "Login successful",
+        "permissions": token_data["permissions"],
+        "session_expiration": token_data["exp"]
+    }
 
 
 @router.post("/generate_embeddings/")
@@ -81,3 +86,12 @@ async def ask_question(query: AskSchema, _=Depends(require_permission("ask"))):
     assistant = Assistant(query.book_filename, embeddings_collection)
     data = assistant.ask(query.question)
     return data
+
+@router.get("/check_session/")
+async def check_session(token_data=Depends(verify_token)):
+    """Checks if the current http cookie has a valid, non-expired token."""
+    return {
+        "permissions": token_data.get("permissions", ""),
+        "session_expiration": token_data.get("exp", ""),
+        "username": token_data.get("username", ""),
+    }

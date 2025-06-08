@@ -21,12 +21,6 @@ def get_token(request: Request) -> str:
     return token
 
 
-def get_current_user_permissions(token: str = Depends(get_token)) -> User:
-    """Returns the current user."""
-    payload = verify_token(token)
-    return payload.get("permissions", "")
-
-
 def generate_access_token(
     data: dict, expiration_delta: Optional[timedelta] = None
 ) -> str:
@@ -60,10 +54,10 @@ def generate_access_token(
     encoded_jwt = jwt.encode(
         token_data, Utils.API_SECRET_KEY, algorithm=Utils.API_TOKEN_ALGORITHM
     )
-    return encoded_jwt
+    return encoded_jwt, expiration
 
 
-def verify_token(token: str) -> dict:
+def verify_token(token: str = Depends(get_token)) -> dict:
     """
     Verifies the provided token.
     Args:
@@ -92,5 +86,11 @@ def login_request(login_data):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
-    token_data = {"idx": user.idx, "permissions": user.role.get_role_permissions()}
-    return (generate_access_token(token_data), token_data["permissions"])
+    token_data = {
+        "idx": user.idx,
+        "username": user.username,
+        "permissions": user.role.get_role_permissions(),
+    }
+    token, expiration = generate_access_token(token_data)
+    token_data.update({"exp": expiration})
+    return (token, token_data)
