@@ -33,15 +33,15 @@ async def login(login_data: LoginRequestSchema, response: Response):
         key="token",
         value=token,
         httponly=True,
-        max_age=Utils.API_TOKEN_EXPIRE_MINUTES, #* 60,
+        max_age=Utils.API_TOKEN_EXPIRE_MINUTES,  # * 60,
         secure=True,
         samesite="None",
-        path="/"
+        path="/",
     )
     return {
         "message": "Login successful",
         "permissions": token_data["permissions"],
-        "session_expiration": token_data["exp"]
+        "session_expiration": token_data["exp"],
     }
 
 
@@ -86,6 +86,7 @@ async def ask_question(query: AskSchema, _=Depends(require_permission("ask"))):
     assistant = Assistant(query.book_filename, embeddings_collection)
     data = assistant.ask(query.question)
     return data
+
 
 @router.get("/check_session/")
 async def check_session(token_data=Depends(verify_token)):
