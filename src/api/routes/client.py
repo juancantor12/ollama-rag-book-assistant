@@ -45,6 +45,21 @@ async def login(login_data: LoginRequestSchema, response: Response):
     }
 
 
+@router.get("/logout/")
+async def logout(response: Response):
+    """Endpoint to log out and clear the token cookie."""
+    response.set_cookie(
+        key="token",
+        value="",
+        httponly=True,
+        max_age=0,
+        secure=True,
+        samesite="None",
+        path="/",
+    )
+    return {"message": "Logged out successfully"}
+
+
 @router.post("/generate_embeddings/")
 async def generate_embeddings(
     book_data: GenerateEmbeddingsSchema,
