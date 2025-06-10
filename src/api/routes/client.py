@@ -33,7 +33,7 @@ async def login(login_data: LoginRequestSchema, response: Response):
         key="token",
         value=token,
         httponly=True,
-        max_age=Utils.API_TOKEN_EXPIRE_MINUTES,  # * 60,
+        max_age=Utils.API_TOKEN_EXPIRE_MINUTES*60,
         secure=True,
         samesite="None",
         path="/",
