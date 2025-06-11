@@ -101,6 +101,13 @@ class EmbeddingsGenerator:
             Utils.logger.info(
                 "The pdf parsing has finished, %s pages parsed.", book.page_count
             )
+    def check_collection(self) -> bool:
+        """Checks if the embeddings db for a book exist."""
+        if Utils.COLLECTION_NAME in [
+            collection.name for collection in self.chromaclient.list_collections()
+        ]:
+            return True
+        return False
 
     def generate_embeddings(self) -> Collection:
         """
@@ -108,9 +115,7 @@ class EmbeddingsGenerator:
         Returns:
         chromadb.api.models.Collection.Collection: The generated collection.
         """
-        if Utils.COLLECTION_NAME in [
-            collection.name for collection in self.chromaclient.list_collections()
-        ]:
+        if self.check_collection():
             Utils.logger.info(
                 "Collection '%s' already exists. Deleting it and creating a new one.",
                 Utils.COLLECTION_NAME,

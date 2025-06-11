@@ -13,3 +13,4 @@ pydantic
 pyjwt
 passlib
 SQLAlchemy
+python-multipart

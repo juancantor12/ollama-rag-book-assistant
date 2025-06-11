@@ -97,10 +97,14 @@ class Utils:
         Returns:
         str: the file name stripped of the extension
         """
+        cleaned = ""
+        noext = file_name
         if "." in file_name:
             segments = file_name.split(".")
-            return ".".join(segments[:-1])
-        return file_name
+            noext = ".".join(segments[:-1])
+        for segment in noext.split(" "):
+            cleaned += segment.capitalize()
+        return cleaned
 
     @staticmethod
     def get_embeddings_db(output_folder: str) -> Union[None, Collection]:

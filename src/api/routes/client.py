@@ -1,7 +1,8 @@
 """Client routes"""
 
 # import time
-from fastapi import APIRouter, Depends, HTTPException, Response
+import shutil
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, File
 import ollama
 from api.controllers.auth import login_request, verify_token
 from api.controllers.rbac import require_permission
@@ -58,6 +59,35 @@ async def logout(response: Response):
         path="/",
     )
     return {"message": "Logged out successfully"}
+
+@router.post("/upload_book/")
+async def upload_book(
+    file: UploadFile = File(...),
+    _=Depends(require_permission("upload_book"))
+):
+    """Endpoint for uploading a book."""
+    try:
+        book_filename = Utils.strip_extension(file.filename)
+        with open(Utils.get_data_path() / (book_filename+".pdf"), "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        return {"message": "File uploaded successfully"}
+    except Exception as e:
+        Utils.logger.critical(e)
+        raise HTTPException(status_code=500, detail="Failed to upload the file") from e
+
+@router.get("/load_books/")
+async def load_books(_=Depends(require_permission("load_books"))):
+    """Endpoint to see uploaded books."""
+    books_folder_path = Utils.get_data_path()
+    pdf_files = []
+    for file in books_folder_path.iterdir():
+        if file.suffix.lower() == '.pdf' and file.is_file():
+            embeddings_generator = EmbeddingsGenerator(file.name)
+            pdf_files.append({
+                "book": file.name,
+                "embeddings": embeddings_generator.check_collection()
+            })
+    return pdf_files
 
 
 @router.post("/generate_embeddings/")
