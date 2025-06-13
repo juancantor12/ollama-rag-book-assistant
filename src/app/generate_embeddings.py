@@ -1,5 +1,7 @@
 """Module for the embeddings generation process."""
 
+import json
+import time
 import re
 from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
@@ -13,6 +15,7 @@ class EmbeddingsGenerator:
 
     def __init__(self, book_filename: str):
         self.book_filename = book_filename
+        self.book_page_length = '...'
         self.output_folder = Utils.strip_extension(book_filename)
         self.chromaclient = PersistentClient(
             path=str(Utils.get_output_path(self.output_folder))
@@ -51,6 +54,7 @@ class EmbeddingsGenerator:
         """
         Utils.logger.info("Retrieving /data/%s", self.book_filename)
         with pymupdf.open(f"{Utils.get_data_path()}/{self.book_filename}") as book:
+            self.book_page_length = book.page_count
             toc = self.get_toc(book)
             page, toc_index = 0, 0
             while page < book.page_count and (toc_index + 1) < len(toc):
@@ -101,6 +105,7 @@ class EmbeddingsGenerator:
             Utils.logger.info(
                 "The pdf parsing has finished, %s pages parsed.", book.page_count
             )
+
     def check_collection(self) -> bool:
         """Checks if the embeddings db for a book exist."""
         if Utils.COLLECTION_NAME in [
@@ -109,12 +114,19 @@ class EmbeddingsGenerator:
             return True
         return False
 
-    def generate_embeddings(self) -> Collection:
+    def generate_embeddings(self, stream: bool = False) -> Collection:
         """
         Generates the embeedings using ollama, stores them in a collection.
         Returns:
         chromadb.api.models.Collection.Collection: The generated collection.
         """
+        c = 0
+        while c < 5:
+            time.sleep(1)
+            c += 1
+            yield f"data: {json.dumps({'progress': f'{c}/5'})}\n\n"
+        yield f"data: {json.dumps({'progress': 'done'})}\n\n"
+        return None
         if self.check_collection():
             Utils.logger.info(
                 "Collection '%s' already exists. Deleting it and creating a new one.",
@@ -126,6 +138,8 @@ class EmbeddingsGenerator:
         batch = {"ids": [], "embeddings": [], "metadatas": [], "documents": []}
         idx = 0
         for text, level, title, page in self.parse_pdf():
+            if stream:
+                yield f"{page}/{self.book_page_length}"
             idx += 1
             response = ollama.embed(model=Utils.EMBEDDINGS_MODEL, input=text)
             Utils.logger.info(

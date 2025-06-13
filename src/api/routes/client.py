@@ -3,6 +3,7 @@
 # import time
 import shutil
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, File
+from fastapi.responses import StreamingResponse
 import ollama
 from api.controllers.auth import login_request, verify_token
 from api.controllers.rbac import require_permission
@@ -34,7 +35,7 @@ async def login(login_data: LoginRequestSchema, response: Response):
         key="token",
         value=token,
         httponly=True,
-        max_age=Utils.API_TOKEN_EXPIRE_MINUTES*60,
+        max_age=Utils.API_TOKEN_EXPIRE_MINUTES * 60,
         secure=True,
         samesite="None",
         path="/",
@@ -60,20 +61,21 @@ async def logout(response: Response):
     )
     return {"message": "Logged out successfully"}
 
+
 @router.post("/upload_book/")
 async def upload_book(
-    file: UploadFile = File(...),
-    _=Depends(require_permission("upload_book"))
+    file: UploadFile = File(...), _=Depends(require_permission("upload_book"))
 ):
     """Endpoint for uploading a book."""
     try:
         book_filename = Utils.strip_extension(file.filename)
-        with open(Utils.get_data_path() / (book_filename+".pdf"), "wb") as buffer:
+        with open(Utils.get_data_path() / (book_filename + ".pdf"), "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         return {"message": "File uploaded successfully"}
     except Exception as e:
         Utils.logger.critical(e)
         raise HTTPException(status_code=500, detail="Failed to upload the file") from e
+
 
 @router.get("/load_books/")
 async def load_books(_=Depends(require_permission("load_books"))):
@@ -81,31 +83,37 @@ async def load_books(_=Depends(require_permission("load_books"))):
     books_folder_path = Utils.get_data_path()
     pdf_files = []
     for file in books_folder_path.iterdir():
-        if file.suffix.lower() == '.pdf' and file.is_file():
+        if file.suffix.lower() == ".pdf" and file.is_file():
             embeddings_generator = EmbeddingsGenerator(file.name)
-            pdf_files.append({
-                "book": file.name,
-                "embeddings": embeddings_generator.check_collection()
-            })
+            pdf_files.append(
+                {
+                    "book": file.name,
+                    "embeddings": embeddings_generator.check_collection(),
+                }
+            )
     return pdf_files
 
 
-@router.post("/generate_embeddings/")
+@router.get("/generate_embeddings/{book_filename}")
 async def generate_embeddings(
-    book_data: GenerateEmbeddingsSchema,
+    book_filename: str,
     _=Depends(require_permission("generate_embeddings")),
 ):
     """Endpoint to generate the embeddings database."""
-    book_filename = book_data.book_filename
-    output_folder = Utils.strip_extension(book_filename)
+    # book_filename = book_data.book_filename
+    # output_folder = Utils.strip_extension(book_filename)
     # Utils.logger = setup_logging(output_folder)
     embeddings_generator = EmbeddingsGenerator(book_filename)
-    embeddings = embeddings_generator.generate_embeddings()
-    if embeddings:
-        return {
-            "message": f"Embeddings generated successfully at /output/{output_folder}"
-        }
-    raise HTTPException(status_code=500, detail="Failed to generate embeddings")
+    return StreamingResponse(
+        embeddings_generator.generate_embeddings(stream=True),
+        media_type="text/event-stream"
+        )
+    # embeddings = embeddings_generator.generate_embeddings()
+    # if embeddings:
+    #     return {
+    #         "message": f"Embeddings generated successfully at /output/{output_folder}"
+    #     }
+    # raise HTTPException(status_code=500, detail="Failed to generate embeddings")
 
 
 @router.post("/ask/")
