@@ -3,7 +3,7 @@
 from typing import List
 from passlib.context import CryptContext
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, defer
 from api.models.user import User
 from api.db import Database
 from api.schemas.user import CreateUserSchema, UpdateUserSchema
@@ -35,7 +35,10 @@ class UserController:
 
     def list(self, limit: int = 1000, offset: int = 0) -> List[User]:
         """List all users."""
-        stmt = select(User).limit(limit).offset(offset).options(selectinload(User.role))
+        stmt = select(User).limit(limit).offset(offset).options(
+            selectinload(User.role),
+            defer(User.password)
+        )
         return list(self.db.session.scalars(stmt))
 
     def update(self, users: List[UpdateUserSchema]) -> int:

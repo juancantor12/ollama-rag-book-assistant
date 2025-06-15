@@ -36,7 +36,7 @@ async def list_permissions(
     permission_controller = PermissionController()
     permissions = permission_controller.list(query.limit, query.offset)
     if permissions is not None:
-        return {"permissions": permissions}
+        return permissions
     raise HTTPException(status_code=500)
 
 
@@ -83,7 +83,7 @@ async def list_roles(query: ListSchema, _=Depends(require_permission("manage_use
     role_controller = RoleController()
     roles = role_controller.list(query.limit, query.offset)
     if roles is not None:
-        return {"roles": roles}
+        return roles
     raise HTTPException(status_code=500)
 
 

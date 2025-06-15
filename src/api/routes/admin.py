@@ -39,7 +39,7 @@ async def list_users(query: ListSchema, _=Depends(require_permission("manage_use
     user_controller = UserController()
     users = user_controller.list(query.limit, query.offset)
     if users is not None:
-        return {"users": users}
+        return users
     raise HTTPException(status_code=500)
 
 
