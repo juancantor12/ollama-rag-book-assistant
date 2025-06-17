@@ -8,3 +8,8 @@ class ListSchema(BaseModel):
 
     limit: int = 1000
     offset: int = 0
+
+
+class GetSchemaSchema(BaseModel):
+    """Get schema."""
+    model_name: str

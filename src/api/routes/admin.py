@@ -5,7 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.controllers.rbac import require_permission
 from api.controllers.user import UserController
 from api.db import Database
-from api.schemas.shared import ListSchema
+from api.models.permission import Permission
+from api.models.role import Role
+from api.models.user import User
+from api.schemas.shared import ListSchema, GetSchemaSchema
 from api.schemas.user import CreateUserSchema, UpdateUserSchema
 
 router = APIRouter(tags=["admin"])
@@ -63,3 +66,33 @@ async def update_users(
     if ln is not None:
         return {"updated_records": ln}
     raise HTTPException(status_code=500)
+
+@router.post("/admin/get_schema")
+async def get_schema(
+    query: GetSchemaSchema, _=Depends(require_permission("get_schema"))
+):
+    """Endpoint for admins to query model schemas."""
+    schema_dict = {
+        "permission": Permission.__table__,
+        "role": Role.__table__,
+        "user": User.__table__
+    }
+    if query.model_name not in schema_dict:
+        raise HTTPException(status_code=404)
+
+    model = schema_dict.get(query.model_name)
+    columns = [
+        {
+            "name": column.name,
+            "type": str(column.type),
+            "autoincrement": column.autoincrement,
+            # "default": column.default,
+            "index": column.index,
+            "unique": column.unique,
+            "nullable": column.nullable,
+            "primary_key": column.primary_key,
+            "comment": column.comment,
+        }
+        for column in model.columns
+    ]
+    return columns
