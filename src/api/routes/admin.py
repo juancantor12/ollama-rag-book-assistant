@@ -67,6 +67,7 @@ async def update_users(
         return {"updated_records": ln}
     raise HTTPException(status_code=500)
 
+
 @router.post("/admin/get_schema")
 async def get_schema(
     query: GetSchemaSchema, _=Depends(require_permission("get_schema"))
@@ -75,7 +76,7 @@ async def get_schema(
     schema_dict = {
         "permission": Permission.__table__,
         "role": Role.__table__,
-        "user": User.__table__
+        "user": User.__table__,
     }
     if query.model_name not in schema_dict:
         raise HTTPException(status_code=404)
@@ -86,7 +87,6 @@ async def get_schema(
             "name": column.name,
             "type": str(column.type),
             "autoincrement": column.autoincrement,
-            # "default": column.default,
             "index": column.index,
             "unique": column.unique,
             "nullable": column.nullable,

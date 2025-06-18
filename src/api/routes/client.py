@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 import ollama
 from api.controllers.auth import login_request, verify_token
 from api.controllers.rbac import require_permission
-from api.schemas.actions import AskSchema, GenerateEmbeddingsSchema
+from api.schemas.actions import AskSchema
 from api.schemas.auth import LoginRequestSchema
 from app.assistant import Assistant
 from app.generate_embeddings import EmbeddingsGenerator
@@ -106,8 +106,8 @@ async def generate_embeddings(
     embeddings_generator = EmbeddingsGenerator(book_filename)
     return StreamingResponse(
         embeddings_generator.generate_embeddings(stream=True),
-        media_type="text/event-stream"
-        )
+        media_type="text/event-stream",
+    )
     # embeddings = embeddings_generator.generate_embeddings()
     # if embeddings:
     #     return {

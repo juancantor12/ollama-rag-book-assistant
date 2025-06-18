@@ -12,4 +12,5 @@ class ListSchema(BaseModel):
 
 class GetSchemaSchema(BaseModel):
     """Get schema."""
+
     model_name: str

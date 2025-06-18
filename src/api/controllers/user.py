@@ -35,9 +35,11 @@ class UserController:
 
     def list(self, limit: int = 1000, offset: int = 0) -> List[User]:
         """List all users."""
-        stmt = select(User).limit(limit).offset(offset).options(
-            selectinload(User.role),
-            defer(User.password)
+        stmt = (
+            select(User)
+            .limit(limit)
+            .offset(offset)
+            .options(selectinload(User.role), defer(User.password))
         )
         return list(self.db.session.scalars(stmt))
 
