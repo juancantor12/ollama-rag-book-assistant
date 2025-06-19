@@ -14,8 +14,8 @@ class User(Base):
     idx = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    role_id = Column(Integer, ForeignKey("roles.idx"), nullable=True)
-    active = Column(Boolean, default=True)
+    role_id = Column(Integer, ForeignKey("roles.idx"), nullable=False)
+    active = Column(Boolean, default=True, nullable=True)
     role = relationship("Role", backref="users", lazy="joined")
 
     def __init__(self, username: str, password: str, role_id: int, active: bool = True):

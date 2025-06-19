@@ -1,6 +1,7 @@
 """Module for the embeddings generation process."""
 
 import json
+
 # import time
 import re
 from chromadb import PersistentClient
