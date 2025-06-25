@@ -82,7 +82,11 @@ def login_request(login_data):
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     db = Database()
     user = db.session.query(User).filter(User.username == login_data.username).first()
-    if not user or not pwd_context.verify(login_data.password, user.password) or not user.active:
+    if (
+        not user
+        or not pwd_context.verify(login_data.password, user.password)
+        or not user.active
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )

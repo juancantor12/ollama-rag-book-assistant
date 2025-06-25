@@ -26,7 +26,7 @@ async def create_db_tables(_=Depends(require_permission("manage_db"))):
 
 @router.post("/admin/users/create")
 async def create_user(
-    users: List[CreateUserSchema], _=Depends(require_permission("manage_users"))
+    users: List[CreateUserSchema], _=Depends(require_permission("manage_access"))
 ):
     """Endpoint for admins to create users."""
     user_controller = UserController()
@@ -37,7 +37,7 @@ async def create_user(
 
 
 @router.post("/admin/users/list")
-async def list_users(query: ListSchema, _=Depends(require_permission("manage_users"))):
+async def list_users(query: ListSchema, _=Depends(require_permission("manage_access"))):
     """Endpoint for admins to see users."""
     user_controller = UserController()
     users = user_controller.list(query.limit, query.offset)
@@ -47,7 +47,7 @@ async def list_users(query: ListSchema, _=Depends(require_permission("manage_use
 
 
 @router.post("/admin/users/delete")
-async def delete_users(idxs: List[int], _=Depends(require_permission("manage_users"))):
+async def delete_users(idxs: List[int], _=Depends(require_permission("manage_access"))):
     """Endpoint for admins to delete users."""
     user_controller = UserController()
     ln = user_controller.delete(idxs)
@@ -58,7 +58,7 @@ async def delete_users(idxs: List[int], _=Depends(require_permission("manage_use
 
 @router.post("/admin/users/update")
 async def update_users(
-    users: List[UpdateUserSchema], _=Depends(require_permission("manage_users"))
+    users: List[UpdateUserSchema], _=Depends(require_permission("manage_access"))
 ):
     """Endpoint for admins to update users."""
     user_controller = UserController()
