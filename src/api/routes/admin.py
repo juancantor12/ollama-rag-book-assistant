@@ -2,6 +2,7 @@
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.inspection import inspect
 from api.controllers.rbac import require_permission
 from api.controllers.user import UserController
 from api.db import Database
@@ -74,9 +75,9 @@ async def get_schema(
 ):
     """Endpoint for admins to query model schemas."""
     schema_dict = {
-        "permission": Permission.__table__,
-        "role": Role.__table__,
-        "user": User.__table__,
+        "permission": Permission,
+        "role": Role,
+        "user": User,
     }
     if query.model_name not in schema_dict:
         raise HTTPException(status_code=404)
@@ -93,6 +94,21 @@ async def get_schema(
             "primary_key": column.primary_key,
             "comment": column.comment,
         }
-        for column in model.columns
+        for column in model.__table__.columns
     ]
+    for relationship in inspect(model).relationships:
+        column = {
+            "name": relationship.key,
+            "type": "RELATIONSHIP",
+            "direction": str(relationship.direction).split(".")[1],
+            "autoincrement": False,
+            "index": True,
+            "related_model": relationship.mapper.class_.__name__,
+            "unique": False,
+            "nullable": False,
+            "primary_key": False,
+            "comment": "",
+        }
+        columns.append(column)
+
     return columns
