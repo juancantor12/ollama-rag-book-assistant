@@ -23,10 +23,4 @@ run.add_middleware(
 run.include_router(client.router)
 run.include_router(admin.router)
 run.include_router(rbac.router)
-run.mount(
-    "/data",
-    StaticFiles(
-        directory=Utils.get_data_path()
-    ),
-    name="data"
-)
+run.mount("/data", StaticFiles(directory=Utils.get_data_path()), name="data")
