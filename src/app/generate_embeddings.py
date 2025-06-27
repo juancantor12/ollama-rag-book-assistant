@@ -121,14 +121,6 @@ class EmbeddingsGenerator:
         Returns:
         chromadb.api.models.Collection.Collection: The generated collection.
         """
-        # c = 0
-        # while c < 5:
-        #     time.sleep(1)
-        #     print(f"adding page {c} of book {self.book_filename}")
-        #     c += 1
-        #     yield f"data: {json.dumps({'progress': f'{c}/5'})}\n\n"
-        # yield f"data: {json.dumps({'progress': 'done'})}\n\n"
-        # return None
         if self.check_collection():
             Utils.logger.info(
                 "Collection '%s' already exists. Deleting it and creating a new one.",
@@ -141,7 +133,6 @@ class EmbeddingsGenerator:
         idx = 0
         for text, level, title, page in self.parse_pdf():
             if stream:
-                # yield f"{page}/{self.book_page_length}"
                 yield f"data: {json.dumps({'progress': f'{page}/{self.book_page_length}'})}\n\n"
             idx += 1
             response = ollama.embed(model=Utils.EMBEDDINGS_MODEL, input=text)
@@ -165,6 +156,14 @@ class EmbeddingsGenerator:
                     documents=batch["documents"],
                 )
                 batch = {"ids": [], "embeddings": [], "metadatas": [], "documents": []}
+        # Save remaining embeddings that didnt filled a entire batch
+        Utils.logger.info("Saving remaining embeddings to chromadb....")
+        collection.add(
+            ids=batch["ids"],
+            embeddings=batch["embeddings"],
+            metadatas=batch["metadatas"],
+            documents=batch["documents"],
+        )
         if stream:
             yield f"data: {json.dumps({'progress': 'done'})}\n\n"
             return None
