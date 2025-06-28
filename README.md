@@ -84,6 +84,13 @@ Or run the CLI directly:
 python -m src.app.cli --book name_of_my_book.pdf --actions generatedb-ask
 ```
 
+The app now exposes a MVC HTTP API using FastApi,JWT authentication, RBAC and SQLAlchemy:
+```
+.\run.ps1 -api
+```
+You can use the swagger, postman or insomnia but I have a separate project that provides a [react UI](https://github.com/juancantor12/ollama-rag-book-assistant-ui) for this api.
+
+
 ### Output Structure
 
 Each time you run the app, a **new folder** will be automatically created inside the `output/` directory with the name of the book provided.
@@ -111,7 +118,8 @@ This app assumes you have:
 ### Roadmap & changelog
 
 In the future i plan to add a user interface and may be add a secondary embeddings database with the user interactions to further enchance querying.
-
+- The app now exposes an API and there is a separate React UI to interact with the api.
+- In the future I will enhance security to self host a live version of the app that can be used through the internet.
 ---
 
 ## Contact
