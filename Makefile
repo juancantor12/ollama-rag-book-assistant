@@ -32,7 +32,11 @@ unit-testing:
 
 launch-api:
 	@echo "Launching api..."
-	uvicorn --app-dir src api.main:run --reload
+	uvicorn --app-dir src api.main:run --reload --forwarded-allow-ips "127.0.0.1"
+
+launch-api-ssl:
+	@echo "Launching api with SSL..."
+	uvicorn --app-dir src api.main:run --reload --host 0.0.0.0 --port 443 --ssl-keyfile=key.pem --ssl-certfile=cert.pem
 
 setup:	install-dependencies \
 		format-code \

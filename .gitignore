@@ -26,3 +26,6 @@ venv.bak/
 # External data the app needs to use
 /data/*
 !/data/.gitkeep
+
+# SSl certificates
+*.pem

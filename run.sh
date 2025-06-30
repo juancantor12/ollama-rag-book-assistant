@@ -2,6 +2,8 @@
 set -e  # Exit immediately if any command exits with a non-zero status
 function show_help() {
     echo "Usage:"
+    echo "-api           Run the fastapi version of the app."
+    echo "-apissl        Run the fastapi version of the app with SSl certificates."
     echo "-book          Name of the book in /data/, the same name will be used for the output/ folder where user generated files will reside."
     echo "-actions       List of actions to perform (dash-separated, no spaces). Defaults to 'all'."
     echo "-install       Installs dependencies."
@@ -25,6 +27,7 @@ execute_action() {
     setup_steps=("-install" "-format" "-lint" "-security" "-audit" "-test")
     case $1 in
         "-api") make launch-api ;;
+        "-apissl") make launch-api-ssl ;;
         "-install") make install-dependencies ;;
         "-format") make format-code ;;
         "-lint") make lint-code ;;

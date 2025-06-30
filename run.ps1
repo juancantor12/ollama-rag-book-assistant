@@ -1,5 +1,6 @@
 param (
     [switch]$api,
+    [switch]$apissl,
     [string]$book,       # Name of the book in /data/, the same name will be used for the output/ folder where user generated files will reside
     [string]$actions,    # Which actions to perform, if empty, all are executed
     [switch]$install,
@@ -26,7 +27,8 @@ function Execute-Action {
         "security" { bandit -r src/ }
         "audit" { pip-audit -r requirements.txt }
         "test" { pytest tests/ -vv }
-        "api" { uvicorn --app-dir src api.main:run --reload }
+        "api" { uvicorn --app-dir src api.main:run --reload --forwarded-allow-ips "127.0.0.1"}
+        "apissl" { uvicorn --app-dir src api.main:run --reload --host 0.0.0.0 --port 443 --ssl-keyfile=key.pem --ssl-certfile=cert.pem }
     }
 }
 
@@ -35,6 +37,7 @@ if ($help){
         @(
             "Usage:",
             "-api           Run the fastapi version of the app.",
+            "-apissl        Run the fastapi version of the app with SSl certificates.",
             "-book          Name of the book in /data/, the same name will be used for the output/ folder where user generated files will reside",
             "-actions       List of actions to perform (dash-separated, no spaces). Defaults to 'all'.",
             "-install       Installs dependencies",
@@ -57,6 +60,7 @@ if ($help){
 }
 
 if ($api) { Execute-Action -action "api"; exit }
+if ($apissl) { Execute-Action -action "apissl"; exit }
 if ($install) { Execute-Action -action "install"; exit }
 if ($format) { Execute-Action -action "format"; exit }
 if ($lint) { Execute-Action -action "lint"; exit }
