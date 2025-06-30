@@ -2,9 +2,9 @@
 
 # import time
 import shutil
+import requests
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, File
 from fastapi.responses import StreamingResponse
-import ollama
 from api.controllers.auth import login_request, verify_token
 from api.controllers.rbac import require_permission
 from api.schemas.actions import AskSchema
@@ -20,8 +20,14 @@ router = APIRouter(tags=["client"])
 async def status():
     """Endpoint to check server status."""
     try:
-        ollama.list()
-        return {"status": "ok"}
+        r = requests.get(Utils.OLLAMA_URL + "/tags", timeout=2)
+        models = [m["name"] for m in r.json()["models"]]
+        if Utils.CHAT_MODEL in models and Utils.EMBEDDINGS_MODEL in models:
+            return {"status": "ok"}
+        raise HTTPException(
+            status_code=503,
+            detail="Ollama is running but the required models are not available",
+        )
     except Exception as e:
         Utils.logger.critical("Ollama server is not up.")
         raise HTTPException(status_code=503, detail="Ollama server is not up") from e

@@ -22,6 +22,7 @@ class Utils:
     API_DB_NAME = os.getenv("API_DB_NAME", "users.db")
 
     # Environment-specific
+    OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
     COLLECTION_NAME = os.getenv("COLLECTION_NAME", "embeddings")
     DEFAULT_DB_FILENAME = os.getenv("DEFAULT_DB_FILENAME", "chroma.sqlite3")
     CHAT_MODEL = os.getenv("CHAT_MODEL")

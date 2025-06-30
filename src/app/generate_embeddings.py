@@ -1,12 +1,10 @@
 """Module for the embeddings generation process."""
 
 import json
-
-# import time
 import re
+import requests
 from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
-import ollama
 import pymupdf
 from .utils import Utils
 
@@ -131,11 +129,16 @@ class EmbeddingsGenerator:
         batch_size = 1024
         batch = {"ids": [], "embeddings": [], "metadatas": [], "documents": []}
         idx = 0
+        session = requests.Session()
         for text, level, title, page in self.parse_pdf():
             if stream:
                 yield f"data: {json.dumps({'progress': f'{page}/{self.book_page_length}'})}\n\n"
             idx += 1
-            response = ollama.embed(model=Utils.EMBEDDINGS_MODEL, input=text)
+            response = session.post(
+                Utils.OLLAMA_URL + "/embed",
+                json={"model": Utils.EMBEDDINGS_MODEL, "input": text},
+                timeout=180,
+            )
             Utils.logger.info(
                 "Adding embeddings for level:   %s, page:  %s, title:   %s, textln:   %s",
                 level,
@@ -144,7 +147,7 @@ class EmbeddingsGenerator:
                 len(text),
             )
             batch["ids"].append(str(idx))
-            batch["embeddings"].extend(response.get("embeddings", ""))
+            batch["embeddings"].extend(response.json().get("embeddings", [[]]))
             batch["metadatas"].append({"level": level, "title": title, "page": page})
             batch["documents"].append(text)
             if len(batch["ids"]) == batch_size:

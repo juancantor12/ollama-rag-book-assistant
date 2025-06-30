@@ -1,8 +1,8 @@
 """Module for the LLM assistant."""
 
 from typing import List, Union
+import requests
 from chromadb.api.models.Collection import Collection
-from ollama import embed, generate
 import pymupdf
 from .utils import Utils
 
@@ -19,9 +19,13 @@ class Assistant:
 
     def get_rag_documents(self, question: str) -> List[str]:
         """Retrieve related document references from the vectordb and pull related pages from the book."""
-        response = embed(model=Utils.EMBEDDINGS_MODEL, input=question)
+        response = requests.post(
+            Utils.OLLAMA_URL + "/embed",
+            json={"model": Utils.EMBEDDINGS_MODEL, "input": question},
+            timeout=180,
+        )
         results = self.embeddings_collection.query(
-            query_embeddings=response.get("embeddings", ""),
+            query_embeddings=response.json().get("embeddings", ""),
             n_results=Utils.N_DOCUMENTS,
         )
         rag_documents = ""
@@ -46,18 +50,28 @@ class Assistant:
     def ask(self, question: str) -> dict:
         """Ask the LLM model a question, the function calls the embeedings db for context."""
         rag_documents, references = self.get_rag_documents(question)
-        output = generate(
-            model=Utils.CHAT_MODEL,
-            options={
-                "num_predict": 2048,  # Number of max tokens in the output
-                "num_ctx": 8196,  # Input + output context length
+        response = requests.post(
+            Utils.OLLAMA_URL + "/generate",
+            json={
+                "model": Utils.CHAT_MODEL,
+                "options": {
+                    "num_predict": 2048,  # Number of max tokens in the output
+                    "num_ctx": 8196,  # Input + output context length
+                },
+                "stream": False,
+                "prompt": (
+                    f"The user will make a question about the book {self.book.metadata.get('title', '')}"
+                    f"from the authors: {self.book.metadata.get('author', '')}"
+                    "The RAG system indentified a related page from the book."
+                    f"These are previou, actual page and next page from the book to provide context: {rag_documents}."
+                    f"Based on those pages respond to this user question: {question}"
+                ),
             },
-            prompt=(
-                f"The user will make a question about the book {self.book.metadata.get('title', '')}"
-                f"from the authors: {self.book.metadata.get('author', '')}"
-                "The RAG system indentified a related page from the book."
-                f"These are previou, actual page and next page from the book to provide context: {rag_documents}."
-                f"Based on those pages respond to this user question: {question}"
-            ),
+            timeout=300,
         )
-        return {"answer": output.get("response", ""), "references": references}
+        return {
+            "answer": response.json().get(
+                "response", "Error retrieving the LLM response"
+            ),
+            "references": references,
+        }
