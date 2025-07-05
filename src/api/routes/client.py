@@ -50,6 +50,7 @@ async def login(login_data: LoginRequestSchema, response: Response):
         "message": "Login successful",
         "permissions": token_data["permissions"],
         "session_expiration": token_data["exp"],
+        "username": login_data.username,
     }
 
 
