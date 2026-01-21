@@ -10,7 +10,6 @@ from api.schemas.permission import CreatePermissionSchema, UpdatePermissionSchem
 from api.schemas.role import CreateRoleSchema, UpdateRoleSchema
 from api.schemas.shared import ListSchema
 
-
 router = APIRouter(tags=["rbac"])
 db = Database()
 

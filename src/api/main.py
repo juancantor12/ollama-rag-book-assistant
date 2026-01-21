@@ -8,7 +8,6 @@ from api.routes import admin
 from api.routes import rbac
 from app.utils import Utils
 
-
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",

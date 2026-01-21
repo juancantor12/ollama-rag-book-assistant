@@ -7,7 +7,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 from app.utils import Utils
 
-
 Base = declarative_base()
 
 
