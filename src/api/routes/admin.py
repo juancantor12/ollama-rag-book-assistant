@@ -4,11 +4,14 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.inspection import inspect
 from api.controllers.rbac import require_permission
+from api.controllers.recovery import RecoveryController
 from api.controllers.user import UserController
 from api.db import Database
 from api.models.permission import Permission
+from api.models.recovery_code import RecoveryCode
 from api.models.role import Role
 from api.models.user import User
+from api.schemas.recovery import RecoveryRequestSchema
 from api.schemas.shared import ListSchema, GetSchemaSchema
 from api.schemas.user import CreateUserSchema, UpdateUserSchema
 
@@ -78,6 +81,7 @@ async def get_schema(
         "permission": Permission,
         "role": Role,
         "user": User,
+        "recovery_code": RecoveryCode,
     }
     if query.model_name not in schema_dict:
         raise HTTPException(status_code=404)
@@ -112,3 +116,21 @@ async def get_schema(
         columns.append(column)
 
     return columns
+
+
+@router.post("/admin/recover/")
+async def recover_admin(data: RecoveryRequestSchema):
+    """Endpoint to recover an admin password using a terminal code."""
+    controller = RecoveryController()
+    ok, reason = controller.reset_password(
+        data.username, data.new_password, data.recovery_code
+    )
+    if ok:
+        return {"message": "Password updated"}
+    if reason == "not_admin":
+        raise HTTPException(status_code=403, detail="User is not an admin")
+    if reason == "missing_table":
+        raise HTTPException(status_code=500, detail="Recovery table is missing")
+    if reason == "user_not_found":
+        raise HTTPException(status_code=404, detail="User not found")
+    raise HTTPException(status_code=401, detail="Invalid or expired recovery code")

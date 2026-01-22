@@ -19,6 +19,9 @@ class Utils:
     API_SECRET_KEY = os.getenv("API_SECRET_KEY")
     API_TOKEN_ALGORITHM = os.getenv("API_TOKEN_ALGORITHM")
     API_TOKEN_EXPIRE_MINUTES = int(os.getenv("API_TOKEN_EXPIRE_MINUTES", "10"))
+    API_RECOVERY_CODE_EXPIRE_MINUTES = int(
+        os.getenv("API_RECOVERY_CODE_EXPIRE_MINUTES", "10")
+    )
     API_DB_NAME = os.getenv("API_DB_NAME", "users.db")
 
     # Environment-specific
