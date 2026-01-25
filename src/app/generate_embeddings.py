@@ -3,7 +3,6 @@
 import json
 import re
 import requests
-from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
 import pymupdf
 from .utils import Utils
@@ -16,8 +15,8 @@ class EmbeddingsGenerator:
         self.book_filename = book_filename
         self.book_page_length = "..."
         self.output_folder = Utils.strip_extension(book_filename)
-        self.chromaclient = PersistentClient(
-            path=str(Utils.get_output_path(self.output_folder))
+        self.chromaclient = Utils.get_chroma_client(
+            str(Utils.get_output_path(self.output_folder))
         )
 
     def get_toc(self, book: pymupdf.Document) -> list:

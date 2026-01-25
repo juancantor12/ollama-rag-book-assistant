@@ -4,7 +4,7 @@ ruff
 black
 pytest
 python-dotenv
-chromadb
+chromadb==0.5.15
 PyMuPDF
 fastapi
 uvicorn
@@ -14,3 +14,4 @@ passlib
 SQLAlchemy
 python-multipart
 requests
+hnswlib==0.8.0

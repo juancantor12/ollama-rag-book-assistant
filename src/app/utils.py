@@ -3,8 +3,9 @@
 import os
 from pathlib import Path
 from typing import Union
-from chromadb import PersistentClient
+from chromadb import AdminClient, PersistentClient
 from chromadb.api.models.Collection import Collection
+from chromadb.config import DEFAULT_DATABASE, DEFAULT_TENANT, Settings
 from dotenv import load_dotenv
 from app.logging import setup_logging
 
@@ -126,7 +127,7 @@ class Utils:
         """
         output_path = Utils.get_output_path(output_folder)
         if (Path(output_path) / Utils.DEFAULT_DB_FILENAME).exists():
-            client = PersistentClient(path=str(output_path))
+            client = Utils.get_chroma_client(str(output_path))
             if Utils.COLLECTION_NAME in [c.name for c in client.list_collections()]:
                 collection = client.get_collection(name=Utils.COLLECTION_NAME)
                 if collection.count() > 0:
@@ -139,3 +140,21 @@ class Utils:
     def get_api_db_path() -> Path:
         """Returns the api DB path."""
         return Utils.get_data_path() / Utils.API_DB_NAME
+
+    @staticmethod
+    def get_chroma_client(path: str) -> PersistentClient:
+        """Return a persistent Chroma client, ensuring tenant/database exist."""
+        settings = Settings(chroma_api_impl="chromadb.api.segment.SegmentAPI")
+        Path(path).mkdir(parents=True, exist_ok=True)
+        settings.persist_directory = str(path)
+        settings.is_persistent = True
+        admin = AdminClient(settings=settings)
+        try:
+            admin.get_tenant(DEFAULT_TENANT)
+        except Exception:
+            admin.create_tenant(DEFAULT_TENANT)
+        try:
+            admin.get_database(DEFAULT_DATABASE, tenant=DEFAULT_TENANT)
+        except Exception:
+            admin.create_database(DEFAULT_DATABASE, tenant=DEFAULT_TENANT)
+        return PersistentClient(path=str(path), settings=settings)

@@ -20,10 +20,8 @@ class RecoveryController:
     def generate_code(self) -> str:
         """Generate a fresh recovery code and persist its hash."""
         if not self.db.table_exists(RecoveryCode.__tablename__):
-            Utils.logger.warning(
-                "Recovery codes table missing. Run /admin/create_db_tables first."
-            )
-            return ""
+            Utils.logger.warning("Recovery codes table missing. Creating it now.")
+            RecoveryCode.__table__.create(self.db.engine, checkfirst=True)
 
         now = datetime.utcnow()
         code = f"{secrets.randbelow(10**6):06d}"
@@ -69,9 +67,7 @@ class RecoveryController:
         ):
             return False, "invalid_code"
 
-        user = (
-            self.db.session.query(User).filter(User.username == username).first()
-        )
+        user = self.db.session.query(User).filter(User.username == username).first()
         if not user:
             return False, "user_not_found"
 

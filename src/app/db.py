@@ -1,7 +1,6 @@
 """Data layer for the api users. This module is UNUSED for now but will repace ChromaDB access in other modules"""
 
 from typing import List, Union
-from chromadb import PersistentClient
 from chromadb.api.models.Collection import Collection
 from app.utils import Utils
 
@@ -11,7 +10,7 @@ class Database:
 
     def __init__(self):
         Utils.logger.info("Initializing users db at data/")
-        self.chromaclient = PersistentClient(path=str(Utils.get_data_path()))
+        self.chromaclient = Utils.get_chroma_client(str(Utils.get_data_path()))
 
     def create_collection(
         self, collection_name: str, overwrite: bool = False
