@@ -32,6 +32,11 @@ class Utils:
     CHAT_MODEL = os.getenv("CHAT_MODEL")
     EMBEDDINGS_MODEL = os.getenv("EMBEDDINGS_MODEL")
     N_DOCUMENTS = int(os.getenv("N_DOCUMENTS", "3"))
+    EXAM_MAX_TOPICS_CHAPTER = int(os.getenv("EXAM_MAX_TOPICS_CHAPTER", "20"))
+    EXAM_MAX_TOPICS_TOPIC = int(os.getenv("EXAM_MAX_TOPICS_TOPIC", "15"))
+    EXAM_MAX_RESULTS_PER_TOPIC = int(os.getenv("EXAM_MAX_RESULTS_PER_TOPIC", "3"))
+    EXAM_MAX_CONTEXT_PAGES = int(os.getenv("EXAM_MAX_CONTEXT_PAGES", "12"))
+    EXAM_MAX_QUESTIONS = int(os.getenv("EXAM_MAX_QUESTIONS", "50"))
 
     def __init__(self, output_folder_name):
         self.output_folder_name = output_folder_name

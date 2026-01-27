@@ -32,12 +32,16 @@ class Assistant:
         pages = set()
         references = []
         for metadata in results["metadatas"][0]:
-            page = metadata["page"]
+            if not isinstance(metadata, dict):
+                continue
+            page = metadata.get("page")
+            if page is None:
+                continue
             surrounding_pages = [page - 1, page, page + 1]
             for surrounding_page in surrounding_pages:
                 if surrounding_page not in pages:
                     pages.add(surrounding_page)
-                    title = metadata["title"]
+                    title = metadata.get("title", "")
                     rag_documents += (
                         f"\n{title}, page {surrounding_page}: "
                         f"\n{self.book.load_page(surrounding_page).get_text()}\n"

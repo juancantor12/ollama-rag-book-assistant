@@ -1,5 +1,8 @@
 """Api entry point."""
 
+# Must run before importing passlib-backed controllers.
+from api.compat import bcrypt_compat  # noqa: F401
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
